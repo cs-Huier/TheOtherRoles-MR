@@ -26,6 +26,11 @@ namespace TheOtherRoles
             this.isModifier = isModifier;
         }
 
+        public static string tl(string key)
+        {
+            return ModTranslation.getString(key);
+        }
+
         public static RoleInfo jester = new RoleInfo("Jester", Jester.color, "Get voted out", "Get voted out", RoleId.Jester, true);
         public static RoleInfo mayor = new RoleInfo("Mayor", Mayor.color, "Your vote counts twice", "Your vote counts twice", RoleId.Mayor);
         public static RoleInfo portalmaker = new RoleInfo("Portalmaker", Portalmaker.color, "You can create portals", "You can create portals", RoleId.Portalmaker);
