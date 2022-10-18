@@ -84,7 +84,8 @@ namespace TheOtherRoles
             }
         }
 
-        public override void Load() {
+        public override void Load() 
+        {
             Logger = Log;
             Instance = this;
 
@@ -108,6 +109,8 @@ namespace TheOtherRoles
 
             GameOptionsData.RecommendedImpostors = GameOptionsData.MaxImpostors = Enumerable.Repeat(3, 16).ToArray(); // Max Imp = Recommended Imp = 3
             GameOptionsData.MinPlayers = Enumerable.Repeat(4, 15).ToArray(); // Min Players = 4
+            
+            ModTranslation.Load();
 
             DebugMode = Config.Bind("Custom", "Enable Debug Mode", false);
             Harmony.PatchAll();
