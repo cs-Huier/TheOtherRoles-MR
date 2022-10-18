@@ -102,13 +102,4 @@ namespace TheOtherRoles
             return Helpers.loadSpriteFromResources(key, pixelsPerUnit);
         }
     }
-
-    [HarmonyPatch(typeof(LanguageSetter), nameof(LanguageSetter.SetLanguage))]
-    class SetLanguagePatch
-    {
-        static void Postfix()
-        {
-            ClientOptionsPatch.updateTranslations();
-        }
-    }
 }
