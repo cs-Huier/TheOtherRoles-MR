@@ -7,7 +7,7 @@ namespace TheOtherRoles {
     public class CustomOptionHolder {
         public static string[] rates = new string[]{"0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"};
         public static string[] ratesModifier = new string[]{"1", "2", "3"};
-        public static string[] presets = new string[]{"Preset 1", "Preset 2", "Preset 3", "Preset 4", "Preset 5"};
+        public static string[] presets = new string[] { "preset" + "1", "preset" + "2", "preset" + "3", "preset" + "4", "preset" + "5" };
 
         public static CustomOption presetSelection;
         public static CustomOption activateRoles;

@@ -1,0 +1,617 @@
+{
+    "jestername": {
+        "0": "Jester",
+        "13": "\u5c0f\u4e11"
+    },
+    "mayorname": {
+        "0": "Mayor",
+        "13": "\u5e02\u957f"
+    },
+    "portalmakername": {
+        "0": "Portalmaker",
+        "13": "\u638c\u95e8\u5e08"
+    },
+    "engineername": {
+        "0": "Engineer",
+        "13": "\u5de5\u7a0b\u5e08"
+    },
+    "sheriffname": {
+        "0": "Sheriff",
+        "13": "\u8b66\u957f"
+    },
+    "deputyname": {
+        "0": "Deputy",
+        "13": "\u526f\u624b"
+    },
+    "lightername": {
+        "0": "Lighter",
+        "13": "\u6301\u706f\u4eba"
+    },
+    "godfathername": {
+        "0": "Godfather",
+        "13": "\u6559\u7236"
+    },
+    "mafiosoname": {
+        "0": "Mafioso",
+        "13": "\u9ed1\u624b\u515a"
+    },
+    "janitorname": {
+        "0": "Janitor",
+        "13": "\u6e05\u6d01\u5de5"
+    },
+    "morphlingname": {
+        "0": "Morphling",
+        "13": "\u8fdb\u5316\u4eba"
+    },
+    "camouflagername": {
+        "0": "Camouflager",
+        "13": "\u4f2a\u88c5\u5e08"
+    },
+    "evilhackername": {
+        "0": "EvilHacker",
+        "13": "\u90aa\u6076\u9ed1\u5ba2"
+    },
+    "vampirename": {
+        "0": "Vampire",
+        "13": "\u5438\u8840\u9b3c"
+    },
+    "erasername": {
+        "0": "Eraser",
+        "13": "\u8bb0\u5fc6\u62b9\u9664\u5e08"
+    },
+    "trickstername": {
+        "0": "Trickster",
+        "13": "\u6363\u86cb\u9b3c"
+    },
+    "cleanername": {
+        "0": "Cleaner",
+        "13": "\u4fdd\u6d01\u5458"
+    },
+    "warlockname": {
+        "0": "Warlock",
+        "13": "\u5deb\u5e08"
+    },
+    "bountyhuntername": {
+        "0": "Bounty Hunter",
+        "13": "\u8d4f\u91d1\u730e\u4eba"
+    },
+    "detectivename": {
+        "0": "Detective",
+        "13": "\u4fa6\u63a2"
+    },
+    "timemastername": {
+        "0": "Time Master",
+        "13": "\u65f6\u738b"
+    },
+    "medicname": {
+        "0": "Medic",
+        "13": "\u62a4\u58eb"
+    },
+    "shiftername": {
+        "0": "Shifter",
+        "13": "\u4f20\u9001\u5e08"
+    },
+    "swappername": {
+        "0": "Swapper",
+        "13": "\u4ea4\u6362\u8005"
+    },
+    "seername": {
+        "0": "Seer",
+        "13": "\u5148\u77e5"
+    },
+    "hackername": {
+        "0": "Hacker",
+        "13": "\u9ed1\u5ba2"
+    },
+    "trackername": {
+        "0": "Tracker",
+        "13": "\u8ffd\u8e2a\u8005"
+    },
+    "snitchname": {
+        "0": "Snitch",
+        "13": "\u5bc6\u63a2"
+    },
+    "jackalname": {
+        "0": "Jackal",
+        "13": "\u8c7a\u72fc"
+    },
+    "sidekickname": {
+        "0": "Sidekick",
+        "13": "\u638c\u5c40\u4eba"
+    },
+    "spyname": {
+        "0": "Spy",
+        "13": "\u95f4\u8c0d"
+    },
+    "securityguardname": {
+        "0": "Security Guard",
+        "13": "\u8b66\u536b"
+    },
+    "arsonistname": {
+        "0": "Arsonist",
+        "13": "\u7eb5\u706b\u72af"
+    },
+    "niceguessername": {
+        "0": "Nice Guesser",
+        "13": "\u6b63\u4e49\u7684\u8d4c\u602a"
+    },
+    "evilguessername": {
+        "0": "Evil Guesser",
+        "13": "\u90aa\u6076\u7684\u8d4c\u602a"
+    },
+    "vulturename": {
+        "0": "Vulture",
+        "13": "\u79c3\u9e6b"
+    },
+    "mediumname": {
+        "0": "Medium",
+        "13": "\u7075\u5a92"
+    },
+    "madmatename": {
+        "0": "Madmate",
+        "13": "\u53db\u5f92"
+    },
+    "lawyername": {
+        "0": "Lawyer",
+        "13": "\u5f8b\u5e08"
+    },
+    "pursuername": {
+        "0": "Pursuer",
+        "13": "\u8ffd\u6c42\u4e4b\u4eba"
+    },
+    "impostorname": {
+        "0": "Impostor",
+        "13": "\u5185\u9b3c"
+    },
+    "crewmatename": {
+        "0": "Crewmate",
+        "13": "\u8239\u5458"
+    },
+    "witchname": {
+        "0": "Witch",
+        "13": "\u5973\u5deb"
+    },
+    "ninjaname": {
+        "0": "Ninja",
+        "13": "\u5fcd\u8005"
+    },
+    "yasunaname": {
+        "0": "Yasuna",
+        "13": "\u5b89\u5a1c"
+    },
+    "evilyasunaname": {
+        "0": "Evil Yasuna",
+        "13": "\u90aa\u6076\u5b89\u5a1c"
+    },
+    "taskmastername": {
+        "0": "Task Master",
+        "13": "\u4efb\u52a1\u5927\u5e08"
+    },
+    "doorhackername": {
+        "0": "DoorHacker",
+        "13": "\u95e8\u5ba2"
+    },
+    "kataomoiname": {
+        "0": "Kataomoi",
+        "13": "\u5361\u5854\u83ab\u4f0a"
+    },
+    "killercreatorname": {
+        "0": "Killer Creator",
+        "13": "\u6697\u6740\u5927\u5e08"
+    },
+    "madmatekillername": {
+        "0": "Madmate Killer",
+        "13": "\u53db\u5f92\u6740\u624b"
+    },
+    "taskracername": {
+        "0": "Task Racer",
+        "13": "\u4efb\u52a1\u7ade\u8d5b\u8005"
+    },
+    "bloodyname": {
+        "0": "Bloody",
+        "13": "\u8840\u9b54"
+    },
+    "antitpname": {
+        "0": "Anti tp",
+        "13": "\u6297\u751f\u7d20"
+    },
+    "tiebreakername": {
+        "0": "Tiebreaker",
+        "13": "\u7834\u5c40\u8005"
+    },
+    "baitname": {
+        "0": "Bait",
+        "13": "\u8bf1\u9975"
+    },
+    "sunglassesname": {
+        "0": "Sunglasses",
+        "13": "\u58a8\u955c"
+    },
+    "lovername": {
+        "0": "Lover",
+        "13": "\u604b\u4eba"
+    },
+    "mininame": {
+        "0": "Mini",
+        "13": "\u8ff7\u4f60\u4eba"
+    },
+    "vipname": {
+        "0": "VIP",
+        "13": "VIP\u5ba2\u6237"
+    },
+    "invertname": {
+        "0": "Invert",
+        "13": "\u53cd\u8f6c\u8005"
+    },
+    "jesterintroDescription": {
+        "0": "Get voted out",
+        "13": "\u8ba9\u5176\u4ed6\u4eba\u6295\u7968\u7ed9\u4f60"
+    },
+    "mayorintroDescription": {
+        "0": "Your vote counts twice"
+    },
+    "portalmakerintroDescription": {
+        "0": "You can create portals"
+    },
+    "engineerintroDescription": {
+        "0": "Maintain important systems on the ship"
+    },
+    "sheriffintroDescription": {
+        "0": "Shoot the <color=#FF1919FF>Impostors</color>"
+    },
+    "deputyintroDescription": {
+        "0": "Handcuff the <color=#FF1919FF>Impostors</color>"
+    },
+    "lighterintroDescription": {
+        "0": "Your light never goes out"
+    },
+    "godfatherintroDescription": {
+        "0": "Kill all Crewmates"
+    },
+    "mafiosointroDescription": {
+        "0": "Work with the <color=#FF1919FF>Mafia</color> to kill the Crewmates"
+    },
+    "janitorintroDescription": {
+        "0": "Work with the <color=#FF1919FF>Mafia</color> by hiding dead bodies"
+    },
+    "morphlingintroDescription": {
+        "0": "Change your look to not get caught"
+    },
+    "camouflagerintroDescription": {
+        "0": "Camouflage and kill the Crewmates"
+    },
+    "evilhackerintroDescription": {
+        "0": "Hack systems and kill the Crewmates"
+    },
+    "vampireintroDescription": {
+        "0": "Kill the Crewmates with your bites"
+    },
+    "eraserintroDescription": {
+        "0": "Kill the Crewmates and erase their roles"
+    },
+    "tricksterintroDescription": {
+        "0": "Use your jack-in-the-boxes to surprise others"
+    },
+    "cleanerintroDescription": {
+        "0": "Kill everyone and leave no traces"
+    },
+    "warlockintroDescription": {
+        "0": "Curse other players and kill everyone"
+    },
+    "bountyhunterintroDescription": {
+        "0": "Hunt your bounty down"
+    },
+    "detectiveintroDescription": {
+        "0": "Find the <color=#FF1919FF>Impostors</color> by examining footprints"
+    },
+    "timemasterintroDescription": {
+        "0": "Save yourself with your time shield\", \"Use your time shield"
+    },
+    "medicintroDescription": {
+        "0": "Protect someone with your shield"
+    },
+    "shifterintroDescription": {
+        "0": "Shift your role"
+    },
+    "swapperintroDescription": {
+        "0": "Swap votes to exile the <color=#FF1919FF>Impostors</color>"
+    },
+    "seerintroDescription": {
+        "0": "You will see players die"
+    },
+    "hackerintroDescription": {
+        "0": "Hack systems to find the <color=#FF1919FF>Impostors</color>"
+    },
+    "trackerintroDescription": {
+        "0": "Track the <color=#FF1919FF>Impostors</color> down"
+    },
+    "snitchintroDescription": {
+        "0": "Finish your tasks to find the <color=#FF1919FF>Impostors</color>"
+    },
+    "jackalintroDescription": {
+        "0": "Kill all Crewmates and <color=#FF1919FF>Impostors</color> to win"
+    },
+    "sidekickintroDescription": {
+        "0": "Help your Jackal to kill everyone"
+    },
+    "spyintroDescription": {
+        "0": "Confuse the <color=#FF1919FF>Impostors</color>"
+    },
+    "securityguardintroDescription": {
+        "0": "Seal vents and place cameras"
+    },
+    "arsonistintroDescription": {
+        "0": "Let them burn"
+    },
+    "niceguesserintroDescription": {
+        "0": "Guess and shoot"
+    },
+    "evilguesserintroDescription": {
+        "0": "Guess and shoot"
+    },
+    "vultureintroDescription": {
+        "0": "Eat corpses to win"
+    },
+    "mediumintroDescription": {
+        "0": "Question the souls of the dead to gain informations"
+    },
+    "madmateintroDescription": {
+        "0": "Help the <color=#FF1919FF>Impostors</color>"
+    },
+    "lawyerintroDescription": {
+        "0": "Defend your client"
+    },
+    "pursuerintroDescription": {
+        "0": "Blank the Impostors"
+    },
+    "impostorintroDescription": {
+        "0": "Sabotage and kill everyone"
+    },
+    "crewmateintroDescription": {
+        "0": "Find the Impostors"
+    },
+    "witchintroDescription": {
+        "0": "Cast a spell upon your foes"
+    },
+    "ninjaintroDescription": {
+        "0": "Surprise and assassinate your foes"
+    },
+    "yasunaintroDescription": {
+        "0": "Exile suspicious crewmates."
+    },
+    "evilYasunaintroDescription": {
+        "0": "Exile smart crewmates."
+    },
+    "taskMasterintroDescription": {
+        "0": "Complete all extra tasks to lead\ncrewmate's team to victory."
+    },
+    "doorHackerintroDescription": {
+        "0": "Slip through the door and cover your tracks."
+    },
+    "kataomoiintroDescription": {
+        "0": "Become one with your unrequited love."
+    },
+    "killerCreatorintroDescription": {
+        "0": "Make a Madmate Killer."
+    },
+    "madmateKillerintroDescription": {
+        "0": "If Impostor dies, kill the Crewmates."
+    },
+    "taskRacerintroDescription": {
+        "0": "Finish the task before everyone\nelse and aim for 1st!"
+    },
+    "bloodyintroDescription": {
+        "0": "Your killer leaves a bloody trail"
+    },
+    "antitpintroDescription": {
+        "0": "You will not get teleported"
+    },
+    "tiebreakerintroDescription": {
+        "0": "Your vote break the tie"
+    },
+    "baitintroDescription": {
+        "0": "Bait your enemies"
+    },
+    "sunglassesintroDescription": {
+        "0": "You got the sunglasses"
+    },
+    "loverintroDescription": {
+        "0": "You are in love"
+    },
+    "miniintroDescription": {
+        "0": "No one will harm you until you grow up"
+    },
+    "vipintroDescription": {
+        "0": "You are the VIP"
+    },
+    "invertintroDescription": {
+        "0": "Your movement is inverted"
+    },
+    "jestershortdescription": {
+        "0": "Get voted out"
+    },
+    "mayorshortdescription": {
+        "0": "Your vote counts twice"
+    },
+    "portalmakershortdescription": {
+        "0": "You can create portals"
+    },
+    "engineershortdescription": {
+        "0": "Repair the ship"
+    },
+    "sheriffshortdescription": {
+        "0": "Shoot the Impostors"
+    },
+    "deputyshortdescription": {
+        "0": "Handcuff the Impostors"
+    },
+    "lightershortdescription": {
+        "0": "Your light never goes out"
+    },
+    "godfathershortdescription": {
+        "0": "Kill all Crewmates"
+    },
+    "mafiososhortdescription": {
+        "0": "Kill all Crewmates"
+    },
+    "janitorshortdescription": {
+        "0": "Hide dead bodies"
+    },
+    "morphlingshortdescription": {
+        "0": "Change your look"
+    },
+    "camouflagershortdescription": {
+        "0": "Hide among others"
+    },
+    "evilhackershortdescription": {
+        "0": "Hack to kill the Crewmates"
+    },
+    "vampireshortdescription": {
+        "0": "Bite your enemies"
+    },
+    "erasershortdescription": {
+        "0": "Erase the roles of your enemies"
+    },
+    "trickstershortdescription": {
+        "0": "Surprise your enemies"
+    },
+    "cleanershortdescription": {
+        "0": "Clean up dead bodies"
+    },
+    "warlockshortdescription": {
+        "0": "Curse and kill everyone"
+    },
+    "bountyhuntershortdescription": {
+        "0": "Hunt your bounty down"
+    },
+    "detectiveshortdescription": {
+        "0": "Examine footprints"
+    },
+    "timemastershortdescription": {
+        "0": "Use your time shield"
+    },
+    "medicshortdescription": {
+        "0": "Protect other players"
+    },
+    "shiftershortdescription": {
+        "0": "Shift your role"
+    },
+    "swappershortdescription": {
+        "0": "Swap votes"
+    },
+    "seershortdescription": {
+        "0": "You will see players die"
+    },
+    "hackershortdescription": {
+        "0": "Hack to find the Impostors"
+    },
+    "trackershortdescription": {
+        "0": "Track the Impostors down"
+    },
+    "snitchshortdescription": {
+        "0": "Finish your tasks"
+    },
+    "jackalshortdescription": {
+        "0": "Kill everyone"
+    },
+    "sidekickshortdescription": {
+        "0": "Help your Jackal to kill everyone"
+    },
+    "spyshortdescription": {
+        "0": "Confuse the Impostors"
+    },
+    "security guardshortdescription": {
+        "0": "Seal vents and place cameras"
+    },
+    "arsonistshortdescription": {
+        "0": "Let them burn"
+    },
+    "niceguessershortdescription": {
+        "0": "Guess and shoot"
+    },
+    "evilguessershortdescription": {
+        "0": "Guess and shoot"
+    },
+    "vultureshortdescription": {
+        "0": "Eat dead bodies"
+    },
+    "mediumshortdescription": {
+        "0": "Question the souls"
+    },
+    "madmateshortdescription": {
+        "0": "Help the Impostors"
+    },
+    "lawyershortdescription": {
+        "0": "Defend your client"
+    },
+    "pursuershortdescription": {
+        "0": "Blank the Impostors"
+    },
+    "impostorshortdescription": {
+        "0": "Sabotage and kill everyone"
+    },
+    "crewmateshortdescription": {
+        "0": "Find the Impostors"
+    },
+    "witchshortdescription": {
+        "0": "Cast a spell upon your foes"
+    },
+    "ninjashortdescription": {
+        "0": "Surprise and assassinate your foes"
+    },
+    "yasunashortdescription": {
+        "0": "Exile suspicious crewmates."
+    },
+    "evilyasunashortdescription": {
+        "0": "Exile smart crewmates."
+    },
+    "taskmastershortdescription": {
+        "0": "Complete all extra tasks to lead\ncrewmate's team to victory."
+    },
+    "doorhackershortdescription": {
+        "0": "Slip through the door and cover your tracks."
+    },
+    "kataomoishortdescription": {
+        "0": "Become one with your unrequited love."
+    },
+    "killercreatorshortdescription": {
+        "0": "Make a Madmate Killer."
+    },
+    "madmatekillershortdescription": {
+        "0": "If Impostor dies, kill the Crewmates."
+    },
+    "taskracershortdescription": {
+        "0": "Finish the task before everyone\nelse and aim for 1st!"
+    },
+    "bloodyshortdescription": {
+        "0": "Your killer leaves a bloody trail"
+    },
+    "antitpshortdescription": {
+        "0": "You will not get teleported"
+    },
+    "tiebreakershortdescription": {
+        "0": "Break the tie"
+    },
+    "baitshortdescription": {
+        "0": "Bait your enemies"
+    },
+    "sunglassesshortdescription": {
+        "0": "Your vision is reduced"
+    },
+    "lovershortdescription": {
+        "0": "You are in love"
+    },
+    "minishortdescription": {
+        "0": "No one will harm you"
+    },
+    "vipshortdescription": {
+        "0": "Everyone is notified when you die"
+    },
+    "invertshortdescription": {
+        "0": "Your movement is inverted"
+    },
+    "preset": {
+        "0": "preset",
+        "13": "\u9884\u8bbe"
+    }
+}

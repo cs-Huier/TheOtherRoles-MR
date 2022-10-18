@@ -16,7 +16,7 @@ using InnerNet;
 
 namespace TheOtherRoles
 {
-    enum RoleId {
+    public enum RoleId {
         Jester,
         Mayor,
         Portalmaker,
