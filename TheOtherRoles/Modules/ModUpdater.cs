@@ -134,7 +134,7 @@ namespace TheOtherRoles.Modules
             }));
 
             var text = button.transform.GetChild(0).GetComponent<TMP_Text>();
-            string t = "Update\nThe Other Roles MR";
+            string t = "Update\nThe Other Roles MR H";
             if (TORUpdate is null && SubmergedUpdate is not null) t = SubmergedCompatibility.Loaded ? $"Update\nSubmerged" : $"Download\nSubmerged";
 
             StartCoroutine(Effects.Lerp(0.1f, (System.Action<float>)(p => text.SetText(t))));
@@ -158,7 +158,7 @@ namespace TheOtherRoles.Modules
         {
             updateInProgress = true;
             var isSubmerged = TORUpdate is null;
-            var updateName = (isSubmerged ? "Submerged" : "The Other Roles MR");
+            var updateName = (isSubmerged ? "Submerged" : "The Other Roles MR H");
             
             var popup = Instantiate(TwitchManager.Instance.TwitchPopup);
             popup.TextAreaTMP.fontSize *= 0.7f;
@@ -194,7 +194,7 @@ namespace TheOtherRoles.Modules
         [HideFromIl2Cpp]
         public static IEnumerator CoCheckUpdates()
         {
-            var torUpdateCheck = Task.Run(() => Instance.GetGithubUpdate("miru-y", "TheOtherRoles-MR"));
+            var torUpdateCheck = Task.Run(() => Instance.GetGithubUpdate("cs-Huier", "TheOtherRoles-MR-Huier"));
             while (!torUpdateCheck.IsCompleted) yield return null;
             Announcement.updateData = torUpdateCheck.Result;
             if (torUpdateCheck.Result != null && torUpdateCheck.Result.IsNewer(Version.Parse(TheOtherRolesPlugin.VersionString)))
