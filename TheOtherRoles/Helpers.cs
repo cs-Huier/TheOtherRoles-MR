@@ -28,10 +28,31 @@ namespace TheOtherRoles {
         Guesser,
         HideNSeek
     }
-    public static class Helpers
-    {
+
+    public enum MapId {
+        Skeld = 0,
+        MiraHQ = 1,
+        Polus = 2,
+        //Dleks = 3, // deactivated
+        Airship = 4,
+    }
+
+    public static class Helpers {
 
         public static Dictionary<string, Sprite> CachedSprites = new();
+
+        public static bool gameStarted
+        {
+            get
+            {
+                return AmongUsClient.Instance?.GameState == InnerNet.InnerNetClient.GameStates.Started;
+            }
+        }
+
+        public static Sprite loadSpriteFromResources(Texture2D texture, float pixelsPerUnit, Rect textureRect, Vector2 pivot)
+        {
+            return Sprite.Create(texture, textureRect, pivot, pixelsPerUnit);
+        }
 
         public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit) {
             try
@@ -78,7 +99,7 @@ namespace TheOtherRoles {
         }
 
         public static AudioClip loadAudioClipFromResources(string path, string clipName = "UNNAMED_TOR_AUDIO_CLIP") {
-            // must be "raw (headerless) 2-channel signed 32 bit pcm (le)" (can e.g. use Audacity® to export)
+            // must be "raw (headerless) 2-channel signed 32 bit pcm (le)" (can e.g. use AudacityÂ® to export)
             try {
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 Stream stream = assembly.GetManifestResourceStream(path);
@@ -105,6 +126,45 @@ namespace TheOtherRoles {
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(exampleClip, false, 0.8f);
             */
         }
+        public static bool existVitals() {
+            switch ((MapId)PlayerControl.GameOptions.MapId) {
+                case MapId.Polus:
+                case MapId.Airship:
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool existSecurityCamera() {
+            switch ((MapId)PlayerControl.GameOptions.MapId) {
+                case MapId.Skeld:
+                case MapId.Polus:
+                case MapId.Airship:
+                    return true;
+            }
+            return false;
+        }
+
+        public static int GetClientId(PlayerControl control)
+        {
+            for (int i = 0; i < AmongUsClient.Instance.allClients.Count; i++) {
+                InnerNet.ClientData data = AmongUsClient.Instance.allClients[i];
+                if (data.Character == control)
+                    return data.Id;
+            }
+            return -1;
+        }
+
+        public static PlayerControl firstImpostorById()
+        {
+            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            {
+                if (player.Data.Role.IsImpostor)
+                    return player;
+            }
+            return null;
+        }
+
         public static PlayerControl playerById(byte id)
         {
             foreach (PlayerControl player in CachedPlayer.AllPlayers)
@@ -132,7 +192,9 @@ namespace TheOtherRoles {
         }
 
         public static void refreshRoleDescription(PlayerControl player) {
-            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(player); 
+            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(player);
+            if (infos.Count > 0 && infos[0].roleId == RoleId.TaskMaster && !player.Data.IsDead && TaskMaster.becomeATaskMasterWhenCompleteAllTasks && !TaskMaster.isTaskComplete)
+                infos[0] = RoleInfo.crewmate;
             List<string> taskTexts = new(infos.Count); 
 
             foreach (var roleInfo in infos)
@@ -194,7 +256,12 @@ namespace TheOtherRoles {
         }
 
         public static bool hasFakeTasks(this PlayerControl player) {
-            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Any(x => x == player));
+
+            if (player == Madmate.madmate)
+                return !Madmate.noticeImpostors;
+
+            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Contains(player) || player == Kataomoi.kataomoi || player == MadmateKiller.madmateKiller);
+
         }
 
         public static bool canBeErased(this PlayerControl player) {
@@ -252,16 +319,36 @@ namespace TheOtherRoles {
             return result;
         }
 
+        public static bool hidePlayerName(PlayerControl target) {
+            return hidePlayerName(PlayerControl.LocalPlayer, target);
+        }
+
         public static bool hidePlayerName(PlayerControl source, PlayerControl target) {
+            if (source != target && Kataomoi.isStalking(target)) return true; // Hide kataomoi nametags
+
+            if (source == target) return false;
+            if (source == null || target == null) return true;
+            if (source.isDead()) return false;
+            if (target.isDead()) return true;
+
             if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
-            else if (Ninja.isInvisble && Ninja.ninja == target) return true; 
-            else if (!MapOptions.hidePlayerNames) return false; // All names are visible
-            else if (source == null || target == null) return true;
-            else if (source == target) return false; // Player sees his own name
-            else if (source.Data.Role.IsImpostor && (target.Data.Role.IsImpostor || target == Spy.spy || target == Sidekick.sidekick && Sidekick.wasTeamRed || target == Jackal.jackal && Jackal.wasTeamRed)) return false; // Members of team Impostors see the names of Impostors/Spies
-            else if ((source == Lovers.lover1 || source == Lovers.lover2) && (target == Lovers.lover1 || target == Lovers.lover2)) return false; // Members of team Lovers see the names of each other
-            else if ((source == Jackal.jackal || source == Sidekick.sidekick) && (target == Jackal.jackal || target == Sidekick.sidekick || target == Jackal.fakeSidekick)) return false; // Members of team Jackal see the names of each other
-            else if (Deputy.knowsSheriff && (source == Sheriff.sheriff || source == Deputy.deputy) && (target == Sheriff.sheriff || target == Deputy.deputy)) return false; // Sheriff & Deputy see the names of each other
+            if (Ninja.isInvisble && Ninja.ninja == target) return true;
+            if (MapOptions.hideOutOfSightNametags && gameStarted && MapUtilities.CachedShipStatus != null && source.transform != null && target.transform != null)
+            {
+                float distMod = 1.025f;
+                float distance = Vector3.Distance(source.transform.position, target.transform.position);
+                bool anythingBetween = PhysicsHelpers.AnythingBetween(source.GetTruePosition(), target.GetTruePosition(), Constants.ShadowMask, false);
+
+                if (distance > MapUtilities.CachedShipStatus.CalculateLightRadius(source.Data) * distMod || anythingBetween) return true;
+            }
+            if (!MapOptions.hidePlayerNames) return false; // All names are visible
+            if (source == null || target == null) return true;
+            if (source == target) return false; // Player sees his own name
+            if (source.Data.Role.IsImpostor && (target.Data.Role.IsImpostor || target == Spy.spy || target == Sidekick.sidekick && Sidekick.wasTeamRed || target == Jackal.jackal && Jackal.wasTeamRed)) return false; // Members of team Impostors see the names of Impostors/Spies
+            if ((source == Lovers.lover1 || source == Lovers.lover2) && (target == Lovers.lover1 || target == Lovers.lover2)) return false; // Members of team Lovers see the names of each other
+            if ((source == Jackal.jackal || source == Sidekick.sidekick) && (target == Jackal.jackal || target == Sidekick.sidekick || target == Jackal.fakeSidekick)) return false; // Members of team Jackal see the names of each other
+            if (Deputy.knowsSheriff && (source == Sheriff.sheriff || source == Deputy.deputy) && (target == Sheriff.sheriff || target == Deputy.deputy)) return false; // Sheriff & Deputy see the names of each other
+
             return true;
         }
 
@@ -323,6 +410,8 @@ namespace TheOtherRoles {
         }
 
         public static bool roleCanUseVents(this PlayerControl player) {
+            if (player == null) return false;
+
             bool roleCouldUse = false;
             if (Engineer.engineer != null && Engineer.engineer == player)
                 roleCouldUse = true;
@@ -334,7 +423,13 @@ namespace TheOtherRoles {
                 roleCouldUse = true;
             else if (Vulture.canUseVents && Vulture.vulture != null && Vulture.vulture == player)
                 roleCouldUse = true;
+
             else if (Thief.canUseVents &&  Thief.thief != null && Thief.thief == player)
+
+            else if (Madmate.canEnterVents && Madmate.madmate != null && Madmate.madmate == player)
+                roleCouldUse = true;
+            else if (MadmateKiller.canEnterVents && MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == player)
+
                 roleCouldUse = true;
             else if (player.Data?.Role != null && player.Data.Role.CanVent)  {
                 if (Janitor.janitor != null && Janitor.janitor == CachedPlayer.LocalPlayer.PlayerControl)
@@ -425,7 +520,7 @@ namespace TheOtherRoles {
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.uncheckedMurderPlayer(killer.PlayerId, target.PlayerId, showAnimation ? Byte.MaxValue : (byte)0);
             }
-            return murder;            
+            return murder;
         }
     
         public static void shareGameVersion() {
@@ -509,6 +604,77 @@ namespace TheOtherRoles {
         public static object TryCast(this Il2CppObjectBase self, Type type)
         {
             return AccessTools.Method(self.GetType(), nameof(Il2CppObjectBase.TryCast)).MakeGenericMethod(type).Invoke(self, Array.Empty<object>());
+        }
+
+        public class DestroyInfo
+        {
+            public DestroyInfo(string searchName, bool isFindChild = true) {
+                this.searchName = searchName;
+                this.isDestroyChild = isFindChild;
+            }
+
+            public string searchName = "";
+            public bool isDestroyChild = true;
+        }
+
+        public static bool isDead(this PlayerControl player) {
+            return player?.Data?.IsDead == true || player?.Data?.Disconnected == true;
+        }
+
+        public static bool isAlive(this PlayerControl player) {
+            return !isDead(player);
+        }
+
+        public static bool destroyGameObjects(GameObject root, DestroyInfo[] excludeInfos = null, GameObject obj = null) {
+            if (obj == null)
+                obj = root;
+
+            DestroyInfo findInfo = null;
+            if (excludeInfos != null)
+                findInfo = Array.Find(excludeInfos, (info) => info.searchName == obj.name);
+            if (obj != root && findInfo == null) {
+                UnityEngine.Object.DestroyImmediate(obj);
+                return true;
+            }
+
+            if (findInfo == null || findInfo.isDestroyChild) {
+                for (int i = 0; i < obj.transform.GetChildCount(); ++i) {
+                    if (destroyGameObjects(root, excludeInfos, obj.transform.GetChild(i).gameObject))
+                        --i;
+                }
+            }
+            return false;
+        }
+
+        public static bool hideGameObjects(GameObject root, DestroyInfo[] excludeInfos = null, GameObject obj = null) {
+            if (obj == null)
+                obj = root;
+
+            DestroyInfo findInfo = null;
+            if (excludeInfos != null)
+                findInfo = Array.Find(excludeInfos, (info) => info.searchName == obj.name);
+            if (obj != root && findInfo == null) {
+                obj.SetActive(false);
+                return true;
+            }
+
+            if (findInfo == null || findInfo.isDestroyChild) {
+                for (int i = 0; i < obj.transform.GetChildCount(); ++i) {
+                    if (destroyGameObjects(root, excludeInfos, obj.transform.GetChild(i).gameObject))
+                        --i;
+                }
+            }
+            return false;
+        }
+
+        public static void logTransform(string name, Transform t, int index = 0) {
+            string space = "";
+            for (int i = 0; i < index; ++i)
+                space += "  ";
+            TheOtherRolesPlugin.Logger.LogMessage(string.Format("[{0}]{1}{2}[{3}]", name, space, t.name,
+                t.gameObject.activeSelf ? "o" : "x"));
+            for (int i = 0; i < t.GetChildCount(); ++i)
+                logTransform(name, t.GetChild(i), index + 1);
         }
     }
 }

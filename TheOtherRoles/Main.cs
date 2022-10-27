@@ -1,4 +1,4 @@
-﻿global using Il2CppInterop.Runtime;
+global using Il2CppInterop.Runtime;
 global using Il2CppInterop.Runtime.Attributes;
 global using Il2CppInterop.Runtime.InteropTypes;
 global using Il2CppInterop.Runtime.InteropTypes.Arrays;
@@ -21,28 +21,34 @@ using Il2CppSystem.Security.Cryptography;
 using Il2CppSystem.Text;
 using Reactor.Networking.Attributes;
 using AmongUs.Data;
+using TheOtherRoles.Objects;
+
 
 namespace TheOtherRoles
 {
-    [BepInPlugin(Id, "The Other Roles", VersionString)]
+    [BepInPlugin(Id, "The Other Roles MR H", VersionString)]
     [BepInDependency(SubmergedCompatibility.SUBMERGED_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInProcess("Among Us.exe")]
     [ReactorModFlags(Reactor.Networking.ModFlags.RequireOnAllClients)]
     public class TheOtherRolesPlugin : BasePlugin
     {
         public const string Id = "me.eisbison.theotherroles";
-        public const string VersionString = "4.2.0";
         public static uint betaDays = 0;  // amount of days for the build to be usable (0 for infinite!)
+        public const string VersionString = "1.0.0";
 
-        public static Version Version = Version.Parse(VersionString);
+        public static System.Version Version = System.Version.Parse(VersionString);
         internal static BepInEx.Logging.ManualLogSource Logger;
 
         public Harmony Harmony { get; } = new Harmony(Id);
         public static TheOtherRolesPlugin Instance;
 
         public static int optionsPage = 2;
+        public static int optionsPageMax = optionsPage + 1;
+
 
         public static ConfigEntry<string> DebugMode { get; private set; }
+        public static ConfigEntry<bool> ViewSeacretMode { get; private set; }
+
         public static ConfigEntry<bool> GhostsSeeTasks { get; set; }
         public static ConfigEntry<bool> GhostsSeeRoles { get; set; }
         public static ConfigEntry<bool> GhostsSeeModifier { get; set; }
@@ -56,6 +62,7 @@ namespace TheOtherRoles
         public static ConfigEntry<string> ShowPopUpVersion { get; set; }
 
         public static Sprite ModStamp;
+        public static Sprite CustomPreset;
 
         public static IRegionInfo[] defaultRegions;
 
@@ -86,23 +93,24 @@ namespace TheOtherRoles
             }
         }
 
-        public override void Load() {
+        public override void Load() 
+        {
             Logger = Log;
             Instance = this;
 
             Helpers.checkBeta(); // Exit if running an expired beta
-
             DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
+            ViewSeacretMode = Config.Bind("Custom", "View Seacret Mode", false);
+
             GhostsSeeTasks = Config.Bind("Custom", "Ghosts See Remaining Tasks", true);
             GhostsSeeRoles = Config.Bind("Custom", "Ghosts See Roles", true);
             GhostsSeeModifier = Config.Bind("Custom", "Ghosts See Modifier", true);
             GhostsSeeVotes = Config.Bind("Custom", "Ghosts See Votes", true);
             ShowRoleSummary = Config.Bind("Custom", "Show Role Summary", true);
-            ShowLighterDarker = Config.Bind("Custom", "Show Lighter / Darker", true);
+            ShowLighterDarker = Config.Bind("Custom", "Show Lighter / Darker", false);
             EnableSoundEffects = Config.Bind("Custom", "Enable Sound Effects", true);
             EnableHorseMode = Config.Bind("Custom", "Enable Horse Mode", false);
             ShowPopUpVersion = Config.Bind("Custom", "Show PopUp", "0");
-            
 
             Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
             Port = Config.Bind("Custom", "Custom Server Port", (ushort)22023);
@@ -111,6 +119,10 @@ namespace TheOtherRoles
             UpdateRegions();
 
             DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
+            GameOptionsData.RecommendedImpostors = GameOptionsData.MaxImpostors = Enumerable.Repeat(3, 16).ToArray(); // Max Imp = Recommended Imp = 3
+            GameOptionsData.MinPlayers = Enumerable.Repeat(4, 15).ToArray(); // Min Players = 4
+            
+            ModTranslation.Load();
             Harmony.PatchAll();
 
             CustomOptionHolder.Load();
@@ -128,6 +140,10 @@ namespace TheOtherRoles
         public static Sprite GetModStamp() {
             if (ModStamp) return ModStamp;
             return ModStamp = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.ModStamp.png", 150f);
+        }
+        public static Sprite GetCustomPreset() {
+            if (CustomPreset) return CustomPreset;
+            return CustomPreset = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.CustomPreset.png", 150f);
         }
     }
 
@@ -155,7 +171,7 @@ namespace TheOtherRoles
     {
         private static readonly string passwordHash = "d1f51dfdfd8d38027fd2ca9dfeb299399b5bdee58e6c0b3b5e9a45cd4e502848";
         private static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
-        private static List<PlayerControl> bots = new List<PlayerControl>();
+        public static List<PlayerControl> bots = new List<PlayerControl>();
 
         public static void Postfix(KeyboardJoystick __instance)
         {
@@ -180,8 +196,15 @@ namespace TheOtherRoles
                 AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
                 
                 playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
+#if true
                 playerControl.GetComponent<DummyBehaviour>().enabled = true;
                 playerControl.NetTransform.enabled = false;
+#else
+                playerControl.GetComponent<DummyBehaviour>().enabled = false;
+                playerControl.isDummy = false;
+                playerControl.notRealPlayer = true;
+                playerControl.NetTransform.enabled = true;
+#endif
                 playerControl.SetName(RandomString(10));
                 playerControl.SetColor((byte) random.Next(Palette.PlayerColors.Length));
                 GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
@@ -193,7 +216,78 @@ namespace TheOtherRoles
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.forceEnd();
             }
+
+#if false
+            if (Input.GetKey(KeyCode.LeftControl))
+			{
+                if (FastDestroyableSingleton<HudManager>.Instance != null)
+				{
+                    if (Input.GetKeyDown(KeyCode.Alpha9))
+                    {
+                        if (debugText != null)
+                        {
+                            if (debugText.gameObject != null)
+                                GameObject.DestroyImmediate(debugText.gameObject);
+                            debugText = null;
+                        }
+                    }
+
+                    if (Input.GetKey(KeyCode.Alpha0))
+                    {
+                        if (debugText == null || debugText.gameObject == null)
+                        {
+                            RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance.roomTracker;
+                            GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
+                            UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
+                            gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
+                            gameObject.transform.localPosition = new Vector3(0, 0, -930f);
+                            gameObject.transform.localScale = Vector3.one * 1f;
+                            debugText = gameObject.GetComponent<TMPro.TMP_Text>();
+                            debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+                        }
+
+                        var builder = new System.Text.StringBuilder();
+                        {
+                        }
+
+                        debugText.text = builder.ToString();
+                        debugText.gameObject.SetActive(true);
+                    }
+                    else if (debugText != null)
+                    {
+                        debugText.gameObject.SetActive(false);
+                    }
+                }
+ 
+
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                {
+                    for (int i = 0; i < bots.Count; ++i)
+                    {
+                        int index = random.Next(bots.Count);
+                        while (bots[index].Data.IsDead)
+                            index = random.Next(bots.Count);
+                        MeetingHud.Instance.CmdCastVote(bots[i].PlayerId, bots[index].PlayerId);
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+                    killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                    killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                    killWriter.Write(byte.MaxValue);
+                    AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                    RPCProcedure.uncheckedMurderPlayer(CachedPlayer.LocalPlayer.PlayerId, CachedPlayer.LocalPlayer.PlayerId, Byte.MaxValue);
+                }
+            }
+ 
+#endif
         }
+
+#if false
+        static TMPro.TMP_Text debugText;
+#endif
 
         public static string RandomString(int length)
         {

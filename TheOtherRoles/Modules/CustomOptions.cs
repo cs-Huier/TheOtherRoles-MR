@@ -12,9 +12,11 @@ using TheOtherRoles.Utilities;
 using static TheOtherRoles.TheOtherRoles;
 using static TheOtherRoles.CustomOption;
 
+
 namespace TheOtherRoles {
     public class CustomOption {
         public enum CustomOptionType {
+            Vanilla,
             General,
             Impostor,
             Neutral,
@@ -23,6 +25,8 @@ namespace TheOtherRoles {
             Guesser,
             HideNSeekMain,
             HideNSeekRoles
+            sizeof_CustomOptionType,
+
         }
 
         public static List<CustomOption> options = new List<CustomOption>();
@@ -71,12 +75,12 @@ namespace TheOtherRoles {
         }
 
         public static CustomOption Create(int id, CustomOptionType type, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false) {
-            return new CustomOption(id, type, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader);
+            return new CustomOption(id, type, name, new string[]{ "<color=#CCCCCCFF>Off</color>", "<color=#FFFF00FF>On</color>" }, defaultValue ? "<color=#FFFF00FF>On</color>" : "<color=#CCCCCCFF>Off</color>", parent, isHeader);
         }
 
         // Static behaviour
 
-            public static void switchPreset(int newPreset) {
+        public static void switchPreset(int newPreset) {
             CustomOption.preset = newPreset;
             foreach (CustomOption option in CustomOption.options) {
                 if (option.id == 0) continue;
@@ -128,21 +132,32 @@ namespace TheOtherRoles {
             return selection + 1;
         }
 
+        public bool isRoleHeader() {
+            if (this == CustomOptionHolder.modifiersAreHidden) return false;
+            return type != CustomOptionType.General && parent == null;
+        }
+
         // Option changes
 
-        public void updateSelection(int newSelection) {
+        public void updateSelection(int newSelection, bool isShareOption = true) {
             selection = Mathf.Clamp((newSelection + selections.Length) % selections.Length, 0, selections.Length - 1);
             if (optionBehaviour != null && optionBehaviour is StringOption stringOption) {
                 stringOption.oldValue = stringOption.Value = selection;
                 stringOption.ValueText.text = selections[selection].ToString();
-
-                if (AmongUsClient.Instance?.AmHost == true && CachedPlayer.LocalPlayer.PlayerControl) {
-                    if (id == 0) switchPreset(selection); // Switch presets
-                    else if (entry != null) entry.Value = selection; // Save selection to config
-
-                    ShareOptionSelections();// Share all selections
+                if (this == CustomOptionHolder.happyBirthdayMode_Target)
+                {
+                    var p = Helpers.playerById((byte)getFloat());
+                    if (p != null)
+                        stringOption.ValueText.text += "(" + p.Data.PlayerName + ")";
                 }
-           }
+            }
+            if (AmongUsClient.Instance?.AmHost == true && CachedPlayer.LocalPlayer.PlayerControl) {
+                if (id == 0) switchPreset(selection); // Switch presets
+                else if (entry != null) entry.Value = selection; // Save selection to config
+
+                if (isShareOption)
+                    ShareOptionSelections();// Share all selections
+            }
         }
     }
 
@@ -258,12 +273,15 @@ namespace TheOtherRoles {
             List<OptionBehaviour> modifierOptions = new List<OptionBehaviour>();
 
 
-            List<Transform> menus = new List<Transform>() { torMenu.transform, impostorMenu.transform, neutralMenu.transform, crewmateMenu.transform, modifierMenu.transform };
-            List<List<OptionBehaviour>> optionBehaviours = new List<List<OptionBehaviour>>() { torOptions, impostorOptions, neutralOptions, crewmateOptions, modifierOptions };
+
+            List<Transform> menus = new List<Transform>() {null, torMenu.transform, impostorMenu.transform, neutralMenu.transform, crewmateMenu.transform, modifierMenu.transform};
+            List<List<OptionBehaviour>> optionBehaviours = new List<List<OptionBehaviour>>() { null, torOptions, impostorOptions, neutralOptions, crewmateOptions, modifierOptions };
 
             for (int i = 0; i < CustomOption.options.Count; i++) {
                 CustomOption option = CustomOption.options[i];
-                if ((int)option.type > 4) continue;
+                if (option.IsSeacretModeOption() && !TheOtherRolesPlugin.ViewSeacretMode.Value)
+                    continue;
+
                 if (option.optionBehaviour == null) {
                     StringOption stringOption = UnityEngine.Object.Instantiate(template, menus[(int)option.type]);
                     optionBehaviours[(int)option.type].Add(stringOption);
@@ -271,6 +289,14 @@ namespace TheOtherRoles {
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
                     stringOption.ValueText.text = option.selections[option.selection].ToString();
+
+                    if (option == CustomOptionHolder.happyBirthdayMode_Target)
+					{
+                        byte id = (byte)option.getFloat();
+                        var p = Helpers.playerById(id);
+                        if (p != null)
+                            stringOption.ValueText.text += "(" + p.Data.PlayerName + ")";
+                    }
 
                     option.optionBehaviour = stringOption;
                 }
@@ -580,6 +606,16 @@ namespace TheOtherRoles {
         }
     }
 
+    public static class CustomOptionExtentions
+	{
+        public static bool IsSeacretModeOption(this CustomOption option)
+        {
+            if (option == CustomOptionHolder.enabledHappyBirthdayMode || option.parent == CustomOptionHolder.enabledHappyBirthdayMode)
+                return true;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(StringOption), nameof(StringOption.OnEnable))]
     public class StringOptionEnablePatch {
         public static bool Prefix(StringOption __instance) {
@@ -590,7 +626,13 @@ namespace TheOtherRoles {
             __instance.TitleText.text = option.name;
             __instance.Value = __instance.oldValue = option.selection;
             __instance.ValueText.text = option.selections[option.selection].ToString();
-            
+            if (option == CustomOptionHolder.happyBirthdayMode_Target)
+            {
+                byte id = (byte)option.getFloat();
+                var p = Helpers.playerById(id);
+                if (p != null)
+                    __instance.ValueText.text += "(" + p.Data.PlayerName + ")";
+            }
             return false;
         }
     }
@@ -737,11 +779,15 @@ namespace TheOtherRoles {
             foreach (CustomOption option in options) {
                 if (MapOptions.gameMode == CustomGamemodes.HideNSeek && option.type != CustomOptionType.HideNSeekMain && option.type != CustomOptionType.HideNSeekRoles) continue;
                 if (option.parent != null) {
-                    bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
 
-                    Color c = isIrrelevant ? Color.grey : Color.white;  // No use for now
-                    if (isIrrelevant) continue;
-                    sb.AppendLine(Helpers.cs(c, $"{option.name}: {option.selections[option.selection].ToString()}"));
+                    if (option.parent != CustomOptionHolder.enabledHappyBirthdayMode) {
+                        bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
+                        if (isIrrelevant) continue;
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
+                        sb.AppendLine($"  {option.name}: {option.selections[option.selection].ToString()}");
+                    }
+
                 } else {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Crewmate Roles");
@@ -749,6 +795,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.crewmateRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.neutralRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Neutral Roles");
@@ -756,6 +804,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.neutralRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.impostorRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Impostor Roles");
@@ -763,6 +813,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.impostorRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.modifiersCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Modifiers");
@@ -770,11 +822,18 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.modifiersCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
-                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax) {
+                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax || option == CustomOptionHolder.enabledHappyBirthdayMode) {
                         continue;
                     } else {
-                        sb.AppendLine($"\n{option.name}: {option.selections[option.selection].ToString()}");
+
+                        bool isIrrelevant = type != CustomOption.CustomOptionType.General && option.getSelection() == 0;
+                        if (isIrrelevant) continue;
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
+                        sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }
                 }
             }
@@ -824,6 +883,7 @@ namespace TheOtherRoles {
             }
 
             hudString += $"\n Press TAB or Page Number for more... ({counter+1}/{maxPage})";
+
             __result = hudString;
         }
     }
@@ -835,28 +895,25 @@ namespace TheOtherRoles {
         {
             int page = TheOtherRolesPlugin.optionsPage;
             if (Input.GetKeyDown(KeyCode.Tab)) {
-                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % 7;
+                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % (int)CustomOption.CustomOptionType.sizeof_CustomOptionType;
             }
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
-                TheOtherRolesPlugin.optionsPage = 0;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Vanilla;
             }
             if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-                TheOtherRolesPlugin.optionsPage = 1;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.General;
             }
             if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
-                TheOtherRolesPlugin.optionsPage = 2;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Impostor;
             }
             if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) {
-                TheOtherRolesPlugin.optionsPage = 3;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Neutral;
             }
             if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5)) {
-                TheOtherRolesPlugin.optionsPage = 4;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Crewmate;
             }
             if (Input.GetKeyDown(KeyCode.Alpha6) || Input.GetKeyDown(KeyCode.Keypad6)) {
-                TheOtherRolesPlugin.optionsPage = 5;
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha7) || Input.GetKeyDown(KeyCode.Keypad7)) {
-                TheOtherRolesPlugin.optionsPage = 6;
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Modifier;
             }
             if (page != TheOtherRolesPlugin.optionsPage) {
                 Vector3 position = (Vector3)FastDestroyableSingleton<HudManager>.Instance?.GameSettings?.transform.localPosition;

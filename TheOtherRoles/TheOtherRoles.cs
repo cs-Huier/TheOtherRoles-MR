@@ -9,6 +9,8 @@ using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
 using static TheOtherRoles.TheOtherRoles;
 using AmongUs.Data;
+using UnhollowerBaseLib;
+using Hazel;
 
 namespace TheOtherRoles
 {
@@ -37,6 +39,7 @@ namespace TheOtherRoles
             Seer.clearAndReload();
             Morphling.clearAndReload();
             Camouflager.clearAndReload();
+            EvilHacker.clearAndReload();
             Hacker.clearAndReload();
             Tracker.clearAndReload();
             Vampire.clearAndReload();
@@ -53,12 +56,18 @@ namespace TheOtherRoles
             BountyHunter.clearAndReload();
             Vulture.clearAndReload();
             Medium.clearAndReload();
+            Madmate.clearAndReload();
             Lawyer.clearAndReload();
             Pursuer.clearAndReload();
             Witch.clearAndReload();
             Ninja.clearAndReload();
             Thief.clearAndReload();
             Trapper.clearAndReload();
+            Yasuna.clearAndReload();
+            DoorHacker.clearAndReload();
+            Kataomoi.clearAndReload();
+            KillerCreator.clearAndReload();
+            MadmateKiller.clearAndReload();
 
             // Modifier
             Bait.clearAndReload();
@@ -74,9 +83,15 @@ namespace TheOtherRoles
             // Gamemodes
             HandleGuesser.clearAndReload();
             HideNSeek.clearAndReload();
+            TaskMaster.clearAndReload();
+
+
+            // Task Vs Mode
+            TaskRacer.clearAndReload();
         }
 
-        public static class Jester {
+        public static class Jester
+        {
             public static PlayerControl jester;
             public static Color color = new Color32(236, 98, 165, byte.MaxValue);
 
@@ -163,14 +178,15 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Engineer {
+        public static class Engineer
+        {
             public static PlayerControl engineer;
             public static Color color = new Color32(0, 40, 245, byte.MaxValue);
             private static Sprite buttonSprite;
 
-            public static int remainingFixes = 1;           
+            public static int remainingFixes = 1;
             public static bool highlightForImpostors = true;
-            public static bool highlightForTeamJackal = true; 
+            public static bool highlightForTeamJackal = true;
 
             public static Sprite getButtonSprite() {
                 if (buttonSprite) return buttonSprite;
@@ -186,7 +202,8 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Godfather {
+        public static class Godfather
+        {
             public static PlayerControl godfather;
             public static Color color = Palette.ImpostorRed;
 
@@ -195,7 +212,8 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Mafioso {
+        public static class Mafioso
+        {
             public static PlayerControl mafioso;
             public static Color color = Palette.ImpostorRed;
 
@@ -205,7 +223,8 @@ namespace TheOtherRoles
         }
 
 
-        public static class Janitor {
+        public static class Janitor
+        {
             public static PlayerControl janitor;
             public static Color color = Palette.ImpostorRed;
 
@@ -224,21 +243,24 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Sheriff {
+        public static class Sheriff
+        {
             public static PlayerControl sheriff;
             public static Color color = new Color32(248, 205, 70, byte.MaxValue);
 
             public static float cooldown = 30f;
+            public static int remainingShots = 1;
             public static bool canKillNeutrals = false;
             public static bool spyCanDieToSheriff = false;
+            public static bool madmateCanDieToSheriff = false;
+            public static bool madmateKillerCanDieToSheriff = false;
 
             public static PlayerControl currentTarget;
 
             public static PlayerControl formerDeputy;  // Needed for keeping handcuffs + shifting
             public static PlayerControl formerSheriff;  // When deputy gets promoted...
 
-            public static void replaceCurrentSheriff(PlayerControl deputy)
-            {
+            public static void replaceCurrentSheriff(PlayerControl deputy) {
                 if (!formerSheriff) formerSheriff = sheriff;
                 sheriff = deputy;
                 currentTarget = null;
@@ -251,8 +273,14 @@ namespace TheOtherRoles
                 formerDeputy = null;
                 formerSheriff = null;
                 cooldown = CustomOptionHolder.sheriffCooldown.getFloat();
+                remainingShots = Mathf.RoundToInt(CustomOptionHolder.sheriffNumberOfShots.getFloat());
                 canKillNeutrals = CustomOptionHolder.sheriffCanKillNeutrals.getBool();
                 spyCanDieToSheriff = CustomOptionHolder.spyCanDieToSheriff.getBool();
+                madmateKillerCanDieToSheriff = CustomOptionHolder.madmateKillerCanDieToSheriff.getBool();
+                madmateCanDieToSheriff = CustomOptionHolder.madmateCanDieToSheriff.getBool();
+                if (CustomOptionHolder.evilHackerSpawnRate.getSelection() > 0 &&
+                    CustomOptionHolder.evilHackerCanCreateMadmate.getBool())
+                    madmateCanDieToSheriff = CustomOptionHolder.createdMadmateCanDieToSheriff.getBool();
             }
         }
 
@@ -273,24 +301,21 @@ namespace TheOtherRoles
 
             private static Sprite buttonSprite;
             private static Sprite handcuffedSprite;
-            
-            public static Sprite getButtonSprite()
-            {
+
+            public static Sprite getButtonSprite() {
                 if (buttonSprite) return buttonSprite;
                 buttonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.DeputyHandcuffButton.png", 115f);
                 return buttonSprite;
             }
 
-            public static Sprite getHandcuffedButtonSprite()
-            {
+            public static Sprite getHandcuffedButtonSprite() {
                 if (handcuffedSprite) return handcuffedSprite;
                 handcuffedSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.DeputyHandcuffed.png", 115f);
                 return handcuffedSprite;
             }
 
             // Can be used to enable / disable the handcuff effect on the target's buttons
-            public static void setHandcuffedKnows(bool active = true)
-            {
+            public static void setHandcuffedKnows(bool active = true) {
                 if (active) {
                     byte localPlayerId = CachedPlayer.LocalPlayer.PlayerId;
                     handcuffedKnows.Add(localPlayerId, handcuffDuration);
@@ -301,8 +326,7 @@ namespace TheOtherRoles
                 HudManagerStartPatch.setAllButtonsHandcuffedStatus(active);
             }
 
-            public static void clearAndReload()
-            {
+            public static void clearAndReload() {
                 deputy = null;
                 currentTarget = null;
                 handcuffedPlayers = new List<byte>();
@@ -317,10 +341,11 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Lighter {
+        public static class Lighter
+        {
             public static PlayerControl lighter;
             public static Color color = new Color32(238, 229, 190, byte.MaxValue);
-            
+
             public static float lighterModeLightsOnVision = 2f;
             public static float lighterModeLightsOffVision = 0.75f;
 
@@ -346,7 +371,8 @@ namespace TheOtherRoles
             }
         }
 
-        public static class Detective {
+        public static class Detective
+        {
             public static PlayerControl detective;
             public static Color color = new Color32(45, 106, 165, byte.MaxValue);
 
@@ -369,7 +395,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class TimeMaster {
+    public static class TimeMaster
+    {
         public static PlayerControl timeMaster;
         public static Color color = new Color32(112, 142, 239, byte.MaxValue);
 
@@ -398,11 +425,12 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Medic {
+    public static class Medic
+    {
         public static PlayerControl medic;
         public static PlayerControl shielded;
         public static PlayerControl futureShielded;
-        
+
         public static Color color = new Color32(126, 251, 194, byte.MaxValue);
         public static bool usedShield;
 
@@ -438,7 +466,33 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Swapper {
+
+    public static class Shifter
+    {
+        public static PlayerControl shifter;
+        public static Color color = new Color32(102, 102, 102, byte.MaxValue);
+
+        public static PlayerControl futureShift;
+        public static PlayerControl currentTarget;
+        public static bool shiftModifiers = false;
+
+        private static Sprite buttonSprite;
+        public static Sprite getButtonSprite() {
+            if (buttonSprite) return buttonSprite;
+            buttonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.ShiftButton.png", 115f);
+            return buttonSprite;
+        }
+
+        public static void clearAndReload() {
+            shifter = null;
+            currentTarget = null;
+            futureShift = null;
+            shiftModifiers = CustomOptionHolder.shifterShiftsModifiers.getBool();
+        }
+    }
+
+    public static class Swapper
+    {
         public static PlayerControl swapper;
         public static Color color = new Color32(134, 55, 86, byte.MaxValue);
         private static Sprite spriteCheck;
@@ -469,7 +523,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Lovers {
+    public static class Lovers
+    {
         public static PlayerControl lover1;
         public static PlayerControl lover2;
         public static Color color = new Color32(232, 57, 185, byte.MaxValue);
@@ -488,9 +543,9 @@ namespace TheOtherRoles
         }
 
         public static bool existingWithKiller() {
-            return existing() && (lover1 == Jackal.jackal     || lover2 == Jackal.jackal
+            return existing() && (lover1 == Jackal.jackal || lover2 == Jackal.jackal
                                || lover1 == Sidekick.sidekick || lover2 == Sidekick.sidekick
-                               || lover1.Data.Role.IsImpostor      || lover2.Data.Role.IsImpostor);
+                               || lover1.Data.Role.IsImpostor || lover2.Data.Role.IsImpostor);
         }
 
         public static bool hasAliveKillingLover(this PlayerControl player) {
@@ -518,7 +573,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Seer {
+    public static class Seer
+    {
         public static PlayerControl seer;
         public static Color color = new Color32(97, 178, 108, byte.MaxValue);
         public static List<Vector3> deadBodyPositions = new List<Vector3>();
@@ -543,12 +599,13 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Morphling {
+    public static class Morphling
+    {
         public static PlayerControl morphling;
         public static Color color = Palette.ImpostorRed;
         private static Sprite sampleSprite;
         private static Sprite morphSprite;
-    
+
         public static float cooldown = 30f;
         public static float duration = 10f;
 
@@ -588,10 +645,11 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Camouflager {
+    public static class Camouflager
+    {
         public static PlayerControl camouflager;
         public static Color color = Palette.ImpostorRed;
-    
+
         public static float cooldown = 30f;
         public static float duration = 10f;
         public static float camouflageTimer = 0f;
@@ -618,7 +676,49 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Hacker {
+    public static class EvilHacker
+    {
+        public static PlayerControl evilHacker;
+        public static Color color = Palette.ImpostorRed;
+
+        public static bool canCreateMadmate = false;
+        public static bool isMobile = false;
+        public static PlayerControl currentTarget;
+
+        private static Sprite buttonSprite;
+        private static Sprite madmateButtonSprite;
+
+        public static Sprite getButtonSprite() {
+            if (buttonSprite) return buttonSprite;
+#if true
+            byte mapId = PlayerControl.GameOptions.MapId;
+            UseButtonSettings button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton]; // Polus
+            if (mapId == 0 || mapId == 3) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton]; // Skeld || Dleks
+            else if (mapId == 1) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton]; // Mira HQ
+            else if (mapId == 4) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton]; // Airship
+            buttonSprite = button.Image;
+#else
+            buttonSprite = DestroyableSingleton<TranslationController>.Instance.GetImage(ImageNames.AirshipAdminButton);
+#endif
+            return buttonSprite;
+        }
+
+        public static Sprite getMadmateButtonSprite() {
+            if (madmateButtonSprite) return madmateButtonSprite;
+            madmateButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.SidekickButton.png", 115f);
+            return madmateButtonSprite;
+        }
+
+        public static void clearAndReload() {
+            evilHacker = null;
+            currentTarget = null;
+            isMobile = false;
+            canCreateMadmate = CustomOptionHolder.evilHackerCanCreateMadmate.getBool();
+        }
+    }
+
+    public static class Hacker
+    {
         public static PlayerControl hacker;
         public static Minigame vitals = null;
         public static Minigame doorLog = null;
@@ -686,7 +786,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Tracker {
+    public static class Tracker
+    {
         public static PlayerControl tracker;
         public static Color color = new Color32(100, 58, 220, byte.MaxValue);
         public static List<Arrow> localArrows = new List<Arrow>();
@@ -706,8 +807,7 @@ namespace TheOtherRoles
         public static Arrow arrow = new Arrow(Color.blue);
 
         private static Sprite trackCorpsesButtonSprite;
-        public static Sprite getTrackCorpsesButtonSprite()
-        {
+        public static Sprite getTrackCorpsesButtonSprite() {
             if (trackCorpsesButtonSprite) return trackCorpsesButtonSprite;
             trackCorpsesButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.PathfindButton.png", 115f);
             return trackCorpsesButtonSprite;
@@ -747,7 +847,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Vampire {
+    public static class Vampire
+    {
         public static PlayerControl vampire;
         public static Color color = Palette.ImpostorRed;
 
@@ -758,7 +859,7 @@ namespace TheOtherRoles
         public static bool garlicsActive = true;
 
         public static PlayerControl currentTarget;
-        public static PlayerControl bitten; 
+        public static PlayerControl bitten;
         public static bool targetNearGarlic = false;
 
         private static Sprite buttonSprite;
@@ -788,7 +889,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Snitch {
+    public static class Snitch
+    {
         public static PlayerControl snitch;
         public static Color color = new Color32(184, 251, 79, byte.MaxValue);
 
@@ -802,7 +904,7 @@ namespace TheOtherRoles
             if (localArrows != null) {
                 foreach (Arrow arrow in localArrows)
                     if (arrow?.arrow != null)
-                    UnityEngine.Object.Destroy(arrow.arrow);
+                        UnityEngine.Object.Destroy(arrow.arrow);
             }
             localArrows = new List<Arrow>();
             taskCountForReveal = Mathf.RoundToInt(CustomOptionHolder.snitchLeftTasksForReveal.getFloat());
@@ -812,13 +914,14 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Jackal {
+    public static class Jackal
+    {
         public static PlayerControl jackal;
         public static Color color = new Color32(0, 180, 235, byte.MaxValue);
         public static PlayerControl fakeSidekick;
         public static PlayerControl currentTarget;
         public static List<PlayerControl> formerJackals = new List<PlayerControl>();
-        
+
         public static float cooldown = 30f;
         public static float createSidekickCooldown = 30f;
         public static bool canUseVents = true;
@@ -860,10 +963,11 @@ namespace TheOtherRoles
             hasImpostorVision = CustomOptionHolder.jackalAndSidekickHaveImpostorVision.getBool();
             wasTeamRed = wasImpostor = wasSpy = false;
         }
-        
+
     }
 
-    public static class Sidekick {
+    public static class Sidekick
+    {
         public static PlayerControl sidekick;
         public static Color color = new Color32(0, 180, 235, byte.MaxValue);
 
@@ -891,7 +995,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Eraser {
+    public static class Eraser
+    {
         public static PlayerControl eraser;
         public static Color color = Palette.ImpostorRed;
 
@@ -900,7 +1005,7 @@ namespace TheOtherRoles
         public static List<PlayerControl> futureErased = new List<PlayerControl>();
         public static PlayerControl currentTarget;
         public static float cooldown = 30f;
-        public static bool canEraseAnyone = false; 
+        public static bool canEraseAnyone = false;
 
         private static Sprite buttonSprite;
         public static Sprite getButtonSprite() {
@@ -918,8 +1023,9 @@ namespace TheOtherRoles
             alreadyErased = new List<byte>();
         }
     }
-    
-    public static class Spy {
+
+    public static class Spy
+    {
         public static PlayerControl spy;
         public static Color color = Palette.ImpostorRed;
 
@@ -935,7 +1041,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Trickster {
+    public static class Trickster
+    {
         public static PlayerControl trickster;
         public static Color color = Palette.ImpostorRed;
         public static float placeBoxCooldown = 30f;
@@ -976,7 +1083,8 @@ namespace TheOtherRoles
 
     }
 
-    public static class Cleaner {
+    public static class Cleaner
+    {
         public static PlayerControl cleaner;
         public static Color color = Palette.ImpostorRed;
 
@@ -995,7 +1103,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Warlock {
+    public static class Warlock
+    {
 
         public static PlayerControl warlock;
         public static Color color = Palette.ImpostorRed;
@@ -1041,7 +1150,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class SecurityGuard {
+    public static class SecurityGuard
+    {
         public static PlayerControl securityGuard;
         public static Color color = new Color32(195, 178, 95, byte.MaxValue);
 
@@ -1131,7 +1241,7 @@ namespace TheOtherRoles
             maxCharges = Mathf.RoundToInt(CustomOptionHolder.securityGuardCamMaxCharges.getFloat());
             rechargeTasksNumber = Mathf.RoundToInt(CustomOptionHolder.securityGuardCamRechargeTasksNumber.getFloat());
             rechargedTasks = Mathf.RoundToInt(CustomOptionHolder.securityGuardCamRechargeTasksNumber.getFloat());
-            charges = Mathf.RoundToInt(CustomOptionHolder.securityGuardCamMaxCharges.getFloat()) /2;
+            charges = Mathf.RoundToInt(CustomOptionHolder.securityGuardCamMaxCharges.getFloat()) / 2;
             placedCameras = 0;
             cooldown = CustomOptionHolder.securityGuardCooldown.getFloat();
             totalScrews = remainingScrews = Mathf.RoundToInt(CustomOptionHolder.securityGuardTotalScrews.getFloat());
@@ -1141,7 +1251,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Arsonist {
+    public static class Arsonist
+    {
         public static PlayerControl arsonist;
         public static Color color = new Color32(238, 112, 46, byte.MaxValue);
 
@@ -1174,7 +1285,7 @@ namespace TheOtherRoles
         public static void clearAndReload() {
             arsonist = null;
             currentTarget = null;
-            douseTarget = null; 
+            douseTarget = null;
             triggerArsonistWin = false;
             dousedPlayers = new List<PlayerControl>();
             foreach (PoolablePlayer p in MapOptions.playerIcons.Values) {
@@ -1185,7 +1296,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Guesser {
+    public static class Guesser
+    {
         public static PlayerControl niceGuesser;
         public static PlayerControl evilGuesser;
         public static Color color = new Color32(255, 255, 0, byte.MaxValue);
@@ -1193,12 +1305,12 @@ namespace TheOtherRoles
         public static int remainingShotsEvilGuesser = 2;
         public static int remainingShotsNiceGuesser = 2;
 
-        public static bool isGuesser (byte playerId) {
+        public static bool isGuesser(byte playerId) {
             if ((niceGuesser != null && niceGuesser.PlayerId == playerId) || (evilGuesser != null && evilGuesser.PlayerId == playerId)) return true;
             return false;
         }
 
-        public static void clear (byte playerId) {
+        public static void clear(byte playerId) {
             if (niceGuesser != null && niceGuesser.PlayerId == playerId) niceGuesser = null;
             else if (evilGuesser != null && evilGuesser.PlayerId == playerId) evilGuesser = null;
         }
@@ -1222,7 +1334,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class BountyHunter {
+    public static class BountyHunter
+    {
         public static PlayerControl bountyHunter;
         public static Color color = Palette.ImpostorRed;
 
@@ -1261,7 +1374,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Vulture {
+    public static class Vulture
+    {
         public static PlayerControl vulture;
         public static Color color = new Color32(139, 69, 19, byte.MaxValue);
         public static List<Arrow> localArrows = new List<Arrow>();
@@ -1296,7 +1410,8 @@ namespace TheOtherRoles
     }
 
 
-    public static class Medium {
+    public static class Medium
+    {
         public static PlayerControl medium;
         public static DeadPlayer target;
         public static DeadPlayer soulTarget;
@@ -1338,7 +1453,40 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Lawyer {
+    public static class Madmate
+    {
+        public static PlayerControl madmate;
+        public static Color color = Palette.ImpostorRed;
+
+        public static bool canEnterVents = false;
+        public static bool hasImpostorVision = false;
+        public static bool noticeImpostors = false;
+        public static bool exileCrewmate = false;
+
+        public static void clearAndReload() {
+            madmate = null;
+            CustomOption opCanEnterVents = CustomOptionHolder.madmateCanEnterVents;
+            CustomOption opHasImpostorVision = CustomOptionHolder.madmateHasImpostorVision;
+            CustomOption opNoticeImpostors = CustomOptionHolder.madmateNoticeImpostors;
+            CustomOption opExileCrewmate = CustomOptionHolder.madmateExileCrewmate;
+
+            if (CustomOptionHolder.evilHackerSpawnRate.getSelection() > 0 &&
+                CustomOptionHolder.evilHackerCanCreateMadmate.getBool()) {
+                // Madmate should be configurable from EvilHacker options if EvilHacker can make a madmate
+                opCanEnterVents = CustomOptionHolder.createdMadmateCanEnterVents;
+                opHasImpostorVision = CustomOptionHolder.createdMadmateHasImpostorVision;
+                opNoticeImpostors = CustomOptionHolder.createdMadmateNoticeImpostors;
+                opExileCrewmate = CustomOptionHolder.createdMadmateExileCrewmate;
+            }
+            canEnterVents = opCanEnterVents.getBool();
+            hasImpostorVision = opHasImpostorVision.getBool();
+            noticeImpostors = opNoticeImpostors.getBool();
+            exileCrewmate = opExileCrewmate.getBool();
+        }
+    }
+
+    public static class Lawyer
+    {
         public static PlayerControl lawyer;
         public static PlayerControl target;
         public static Color color = new Color32(134, 153, 25, byte.MaxValue);
@@ -1373,7 +1521,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Pursuer {
+    public static class Pursuer
+    {
         public static PlayerControl pursuer;
         public static PlayerControl target;
         public static Color color = Lawyer.color;
@@ -1403,7 +1552,8 @@ namespace TheOtherRoles
         }
     }
 
-    public static class Witch {
+    public static class Witch
+    {
         public static PlayerControl witch;
         public static Color color = Palette.ImpostorRed;
 
@@ -1490,6 +1640,7 @@ namespace TheOtherRoles
         }
     }
 
+
     public static class Thief {
         public static PlayerControl thief;
         public static Color color = new Color32(71, 99, 45, Byte.MaxValue);
@@ -1551,6 +1702,883 @@ namespace TheOtherRoles
             anonymousMap = CustomOptionHolder.trapperAnonymousMap.getBool();
             infoType = CustomOptionHolder.trapperInfoType.getSelection();
             trapDuration = CustomOptionHolder.trapperTrapDuration.getFloat();
+
+    public static class Yasuna
+    {
+        public static PlayerControl yasuna;
+        public static Color color = new Color32(90, 255, 25, byte.MaxValue);
+        public static byte specialVoteTargetPlayerId = byte.MaxValue;
+        private static int _remainingSpecialVotes = 1;
+        private static Sprite targetSprite;
+
+        public static void clearAndReload() {
+            yasuna = null;
+            _remainingSpecialVotes = Mathf.RoundToInt(CustomOptionHolder.yasunaNumberOfSpecialVotes.getFloat());
+            specialVoteTargetPlayerId = byte.MaxValue;
+        }
+
+        public static Sprite getTargetSprite(bool isImpostor) {
+            if (targetSprite) return targetSprite;
+            targetSprite = Helpers.loadSpriteFromResources(isImpostor ? "TheOtherRoles.Resources.EvilYasunaTargetIcon.png" : "TheOtherRoles.Resources.YasunaTargetIcon.png", 150f);
+            return targetSprite;
+        }
+
+        public static int remainingSpecialVotes(bool isVote = false) {
+            if (yasuna == null)
+                return 0;
+
+            if (isVote)
+                _remainingSpecialVotes = Mathf.Max(0, _remainingSpecialVotes - 1);
+            return _remainingSpecialVotes;
+        }
+
+        public static bool isYasuna(byte playerId) {
+            return yasuna != null && yasuna.PlayerId == playerId;
+        }
+    }
+
+    public static class TaskMaster
+    {
+        public static PlayerControl taskMaster = null;
+        public static bool becomeATaskMasterWhenCompleteAllTasks = false;
+        public static Color color = new Color32(225, 86, 75, byte.MaxValue);
+        public static bool isTaskComplete = false;
+        public static byte clearExTasks = 0;
+        public static byte allExTasks = 0;
+        public static byte oldTaskMasterPlayerId = byte.MaxValue;
+        public static bool triggerTaskMasterWin = false;
+
+        public static void clearAndReload() {
+            taskMaster = null;
+            becomeATaskMasterWhenCompleteAllTasks = CustomOptionHolder.taskMasterBecomeATaskMasterWhenCompleteAllTasks.getBool();
+            isTaskComplete = false;
+            clearExTasks = 0;
+            allExTasks = 0;
+            oldTaskMasterPlayerId = byte.MaxValue;
+            triggerTaskMasterWin = false;
+        }
+
+        public static bool isTaskMaster(byte playerId) {
+            return taskMaster != null && taskMaster.PlayerId == playerId;
+        }
+    }
+
+    public static class DoorHacker
+    {
+        public static PlayerControl doorHacker;
+        public static Color color = Palette.ImpostorRed;
+
+        public static float cooldown = 30f;
+        public static float duration = 3f;
+        public static float doorHackerTimer = 0f;
+        public static int remainingUses = -1;
+
+        private static Il2CppArrayBase<PlainDoor> doors = null;
+        private static List<bool> enableDoors = null;
+
+        private static Sprite buttonSprite;
+        public static Sprite getButtonSprite() {
+            if (buttonSprite) return buttonSprite;
+            buttonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.DoorHackerButton.png", 115f);
+            return buttonSprite;
+        }
+
+        public static void DisableDoors(int playerId) {
+            if (doorHacker == null || doorHacker.PlayerId != playerId) return;
+            if (remainingUses == 0) return;
+
+            if (playerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId) {
+                doors = GameObject.FindObjectsOfType<PlainDoor>();
+                if (doors != null && doors.Count > 0) {
+                    doorHackerTimer = duration;
+                    enableDoors = new List<bool>();
+                    for (int i = 0; i < doors.Count; ++i) {
+                        enableDoors.Add(doors[i].myCollider.enabled);
+                        doors[i].myCollider.enabled = false;
+                    }
+                }
+            } else {
+                doorHacker.Collider.isTrigger = true;
+            }
+        }
+
+        public static void ResetDoors(bool consumeRemain = false) {
+            if (doorHacker == null) return;
+            if (consumeRemain && remainingUses != -1)
+                --remainingUses;
+            doorHackerTimer = 0f;
+            doorHacker.Collider.isTrigger = false;
+            if (doors == null) return;
+            for (int i = 0; i < doors.Count; ++i)
+                doors[i].myCollider.enabled = enableDoors[i];
+            enableDoors.Clear();
+            doors = null;
+        }
+
+        public static void clearAndReload() {
+            cooldown = CustomOptionHolder.doorHackerCooldown.getFloat();
+            duration = CustomOptionHolder.doorHackerDuration.getFloat();
+            int num = Mathf.RoundToInt(CustomOptionHolder.doorHackerNumberOfUses.getFloat());
+            remainingUses = num == 0 ? -1 : num;
+
+            ResetDoors();
+        }
+    }
+
+    [HarmonyPatch]
+    public static class Kataomoi
+    {
+        public static PlayerControl kataomoi;
+        public static Color color = Lovers.color;
+
+        public static float stareCooldown = 30f;
+        public static float stareDuration = 3f;
+        public static int stareCount = 1;
+        public static int stareCountMax = 1;
+        public static float stalkingCooldown = 30f;
+        public static float stalkingDuration = 5f;
+        public static float stalkingFadeTime = 0.5f;
+        public static float searchCooldown = 30f;
+        public static float searchDuration = 5f;
+        public static bool isSearch = false;
+        public static float stalkingTimer = 0f;
+        public static float stalkingEffectTimer = 0f;
+        public static bool triggerKataomoiWin = false;
+        public static PlayerControl target = null;
+        public static PlayerControl currentTarget = null;
+        public static TMPro.TextMeshPro stareText = null;
+        public static SpriteRenderer[] gaugeRenderer = new SpriteRenderer[3];
+        public static Arrow arrow;
+        public static float gaugeTimer = 0.0f;
+        public static float baseGauge = 0f;
+
+        static bool _isStalking = false;
+
+        static Sprite stareSprite;
+        public static Sprite getStareSprite() {
+            if (stareSprite) return stareSprite;
+            stareSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.KataomoiStareButton.png", 115f);
+            return stareSprite;
+        }
+
+        static Sprite loveSprite;
+        public static Sprite getLoveSprite() {
+            if (loveSprite) return loveSprite;
+            loveSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.KataomoiLoveButton.png", 115f);
+            return loveSprite;
+        }
+
+        static Sprite searchSprite;
+        public static Sprite getSearchSprite() {
+            if (searchSprite) return searchSprite;
+            searchSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.KataomoiSearchButton.png", 115f);
+            return searchSprite;
+        }
+
+        static Sprite stalkingSprite;
+        public static Sprite getStalkingSprite() {
+            if (stalkingSprite) return stalkingSprite;
+            stalkingSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.KataomoiStalkingButton.png", 115f);
+            return stalkingSprite;
+        }
+
+        static Sprite[] loveGaugeSprites = new Sprite[3];
+        public static Sprite getLoveGaugeSprite(int index) {
+            if (index < 0 || index >= loveGaugeSprites.Length) return null;
+            if (loveGaugeSprites[index]) return loveGaugeSprites[index];
+
+            int id = 0;
+            switch (index) {
+                case 0: id = 1; break;
+                case 1: id = 2; break;
+                case 2: id = 11; break;
+            }
+            loveGaugeSprites[index] = Helpers.loadSpriteFromResources(String.Format("TheOtherRoles.Resources.KataomoiGauge_{0:d2}.png", id), 115f);
+            return loveGaugeSprites[index];
+        }
+
+        public static void doStare() {
+            baseGauge = getLoveGauge();
+            gaugeTimer = 1.0f;
+            stareCount = Mathf.Max(0, stareCount - 1);
+
+            if (gaugeRenderer[2] != null && stareCount == 0) {
+                gaugeRenderer[2].color = color;
+            }
+            if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(DestroyableSingleton<HudManager>.Instance.TaskCompleteSound, false, 0.8f);
+        }
+
+        public static void doStalking() {
+            if (kataomoi == null) return;
+            stalkingTimer = stalkingDuration;
+            _isStalking = true;
+        }
+
+        public static void resetStalking() {
+            if (kataomoi == null) return;
+            _isStalking = false;
+            setAlpha(1.0f);
+        }
+
+        public static bool isStalking(PlayerControl player) {
+            if (player == null || player != kataomoi) return false;
+            return _isStalking && stalkingTimer > 0;
+        }
+
+        public static bool isStalking() {
+            return isStalking(kataomoi);
+        }
+
+        public static void doSearch() {
+            if (kataomoi == null) return;
+            isSearch = true;
+        }
+
+        public static void resetSearch() {
+            if (kataomoi == null) return;
+            isSearch = false;
+        }
+
+        public static bool canLove() {
+            return stareCount <= 0;
+        }
+
+        public static float getLoveGauge() {
+            return 1.0f - (stareCountMax == 0 ? 0f : (float)stareCount / (float)stareCountMax);
+        }
+
+        public static void clearAndReload() {
+            resetStalking();
+
+            kataomoi = null;
+            stareCooldown = CustomOptionHolder.kataomoiStareCooldown.getFloat();
+            stareDuration = CustomOptionHolder.kataomoiStareDuration.getFloat();
+            stareCount = stareCountMax = (int)CustomOptionHolder.kataomoiStareCount.getFloat();
+            stalkingCooldown = CustomOptionHolder.kataomoiStalkingCooldown.getFloat();
+            stalkingDuration = CustomOptionHolder.kataomoiStalkingDuration.getFloat();
+            stalkingFadeTime = CustomOptionHolder.kataomoiStalkingFadeTime.getFloat();
+            searchCooldown = CustomOptionHolder.kataomoiSearchCooldown.getFloat();
+            searchDuration = CustomOptionHolder.kataomoiSearchDuration.getFloat();
+            isSearch = false;
+            stalkingTimer = 0f;
+            stalkingEffectTimer = 0f;
+            triggerKataomoiWin = false;
+            target = null;
+            currentTarget = null;
+            if (stareText != null && stareText.gameObject != null) UnityEngine.Object.Destroy(stareText.gameObject);
+            stareText = null;
+            if (arrow != null && arrow.arrow != null) UnityEngine.Object.Destroy(arrow.arrow);
+            for (int i = 0; i < gaugeRenderer.Length; ++i) {
+                if (gaugeRenderer[i] != null) {
+                    UnityEngine.Object.Destroy(gaugeRenderer[i].gameObject);
+                    gaugeRenderer[i] = null;
+                }
+            }
+            arrow = null;
+            gaugeTimer = 0.0f;
+            baseGauge = 0.0f;
+        }
+
+        public static void fixedUpdate(PlayerPhysics __instance) {
+            if (kataomoi == null) return;
+            if (kataomoi != __instance.myPlayer) return;
+
+            if (gaugeRenderer[1] != null && gaugeTimer > 0.0f)
+            {
+                gaugeTimer = Mathf.Max(gaugeTimer - Time.fixedDeltaTime, 0.0f);
+                float gauge = getLoveGauge();
+                float nowGauge = Mathf.Lerp(baseGauge, gauge, 1.0f - gaugeTimer);
+                gaugeRenderer[1].transform.localPosition = new Vector3(Mathf.Lerp(-3.470784f - 1.121919f, -3.470784f, nowGauge), -2.626999f, -8.1f);
+                gaugeRenderer[1].transform.localScale = new Vector3(nowGauge, 1, 1);
+            }
+
+            if (kataomoi.isDead()) return;
+            if (_isStalking && stalkingTimer > 0)
+            {
+                kataomoi.cosmetics.currentBodySprite.BodySprite.material.SetFloat("_Outline", 0f);
+                stalkingTimer = Mathf.Max(0f, stalkingTimer - Time.fixedDeltaTime);
+                if (stalkingFadeTime > 0)
+                {
+                    float elapsedTime = stalkingDuration - stalkingTimer;
+                    float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
+                    alpha = Mathf.Clamp(1f - alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
+                    setAlpha(alpha);
+                }
+                else
+                {
+                    setAlpha(CachedPlayer.LocalPlayer.PlayerControl == kataomoi ? 0.1f : 0f);
+                }
+
+                if (stalkingTimer <= 0f)
+                {
+                    _isStalking = false;
+                    stalkingEffectTimer = stalkingFadeTime;
+                }
+            }
+            else if (!_isStalking && stalkingEffectTimer > 0)
+            {
+                stalkingEffectTimer = Mathf.Max(0f, stalkingEffectTimer - Time.fixedDeltaTime);
+                if (stalkingFadeTime > 0)
+                {
+                    float elapsedTime = stalkingFadeTime - stalkingEffectTimer;
+                    float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
+                    alpha = Mathf.Clamp(alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
+                    setAlpha(alpha);
+                }
+                else
+                {
+                    setAlpha(1.0f);
+                }
+            }
+            else
+            {
+                setAlpha(1.0f);
+            }
+        }
+
+        static void setAlpha(float alpha) {
+            if (kataomoi == null) return;
+            var color = Color.Lerp(Palette.ClearWhite, Palette.White, alpha);
+            try {
+                if (kataomoi.cosmetics?.currentBodySprite?.BodySprite != null)
+                    kataomoi.cosmetics.currentBodySprite.BodySprite.color = color;
+
+                if (kataomoi.cosmetics?.skin?.layer != null)
+                    kataomoi.cosmetics.skin.layer.color = color;
+
+                if (kataomoi.cosmetics.hat != null)
+                    kataomoi.cosmetics.hat.SetMaterialColor(color.ToInteger(true));
+
+                if (kataomoi.cosmetics.currentPet?.rend != null)
+                    kataomoi.cosmetics.currentPet.rend.color = color;
+
+                if (kataomoi.cosmetics.currentPet?.shadowRend != null)
+                    kataomoi.cosmetics.currentPet.shadowRend.color = color;
+
+                if (kataomoi.cosmetics.visor != null)
+                    kataomoi.cosmetics.visor.Alpha = alpha;
+            } catch { }
+        }
+    }
+
+    // Task Vs Mode
+    [HarmonyPatch]
+    public static class TaskRacer
+    {
+        public static Color color = new Color32(255, 116, 78, byte.MaxValue);
+        public static Color firstRankColor = new Color32(214, 161, 64, byte.MaxValue);
+        public static Color secondRankColor = new Color32(190, 193, 195, byte.MaxValue);
+        public static Color thirdRankColor = new Color32(196, 112, 34, byte.MaxValue);
+        public static Color defaultRankColor = new Color32(255, 255, 255, byte.MaxValue);
+
+        public static TMPro.TextMeshPro startText = null;
+        public static TMPro.TextMeshPro timerText = null;
+        public static bool triggerTaskVsModeEnd = false;
+        public static List<Vector3> rankUIPositions = new List<Vector3>();
+        public static Dictionary<byte, GameObject> taskFinishedMarkTable = new Dictionary<byte, GameObject>();
+
+        public static List<Info> taskRacers = new List<Info>();
+        public static SpriteRenderer[] rankGameSpriteRenderer = new SpriteRenderer[3];
+        public static GameObject[] rankMarkObjects = new GameObject[3];
+        public static float coolTime = 0;
+        public static float effectDuration = 3.0f;
+        public static float vision = 2.0f;
+
+        static List<MoveInfo> moveInfoList = new List<MoveInfo>();
+        static float startTime = 0.0f;
+        static float fadeTime = 0.0f;
+        static bool _canMove = false;
+        static int timeSecOld = -1;
+
+        static Info self = null;
+        static DateTime selfStartDateTime = default;
+        static DateTime selfEndDateTime = default;
+        static byte[] hostTaskTypeIds = null;
+        static Dictionary<uint, byte[]> hostTaskIdDataTable = new Dictionary<uint, byte[]>();
+        static Vector2 retireStartPos = Vector2.zero;
+
+        public class Info
+        {
+            public PlayerControl player = null;
+            public bool isReady = false;
+            public int taskCount = 0;
+            public int taskCompleteCount = -1;
+            public ulong taskCompleteTime = ulong.MaxValue;
+
+            public Info(PlayerControl player) {
+                this.player = player;
+                if (CachedPlayer.LocalPlayer.PlayerControl == player)
+                    self = this;
+            }
+
+            public void updateTaskInfo() {
+                taskCount = player.Data.Tasks.Count;
+                taskCompleteCount = 0;
+                for (int i = 0; i < taskCount; ++i) {
+                    if (player.Data.Tasks[i].Complete)
+                        ++taskCompleteCount;
+                }
+            }
+            public bool isTaskComplete() {
+                return player.isDead() || player.isDummy || player.notRealPlayer || (taskCompleteCount != -1 && taskCount == taskCompleteCount);
+            }
+        }
+
+        public class MoveInfo
+        {
+            public Transform moveObj = null;
+            Vector3 pos = default;
+            Vector3 movePos = default;
+            float swapTime = 0.0f;
+            float timer = 0.0f;
+
+            public MoveInfo(Transform moveObj, Vector3 movePos, float swapTime) {
+                this.moveObj = moveObj;
+                this.pos = moveObj.localPosition;
+                this.movePos = movePos;
+                this.swapTime = this.timer = swapTime;
+            }
+
+            public bool update() {
+                if (timer <= 0.0f) return false;
+                timer = Mathf.Max(timer - Time.unscaledDeltaTime, 0.0f);
+                moveObj.localPosition = Vector3.Lerp(pos, movePos, 1.0f - (timer / swapTime));
+                return timer > 0.0f;
+            }
+        }
+
+        public static Color getRankTextColor(int rank) {
+            Color color = Palette.White;
+            switch (rank) {
+                case 1:
+                    color = firstRankColor;
+                    break;
+                case 2:
+                    color = secondRankColor;
+                    break;
+                case 3:
+                    color = thirdRankColor;
+                    break;
+                default:
+                    color = defaultRankColor;
+                    break;
+            }
+            return color;
+        }
+
+        public static string getRankText(int rank, bool is_deco = false) {
+            string rankText = "";
+            switch (rank) {
+                case 1:
+                    rankText = "1st";
+                    break;
+                case 2:
+                    rankText = "2nd";
+                    break;
+                case 3:
+                    rankText = "3rd";
+                    break;
+                default:
+                    rankText = string.Format("{0}st", rank);
+                    break;
+            }
+            return is_deco ? Helpers.cs(getRankTextColor(rank), rankText) : rankText;
+        }
+
+        public static int getRank(PlayerControl p) {
+            for (int i = 0; i < taskRacers.Count; ++i) {
+                if (taskRacers[i].player == p)
+                    return i + 1;
+            }
+            return -1;
+        }
+
+        public static void startGame() {
+            startTime = 3.0f;
+            _canMove = false;
+            sortTaskRacers();
+        }
+
+        public static void setTaskCompleteTimeSec(byte playerId, ulong timeMilliSec) {
+            var taskRacer = getTaskRacer(playerId);
+            if (taskRacer == null) return;
+
+            taskRacer.taskCompleteTime = timeMilliSec;
+        }
+
+        public static void updateTask(PlayerControl pc) {
+            var taskRacer = getTaskRacer(pc.PlayerId);
+            if (taskRacer == null) return;
+            taskRacer.updateTaskInfo();
+
+            // All task completed
+            if (self.player == pc && self.isTaskComplete()) {
+                selfEndDateTime = DateTime.Now;
+                timerText.color = color;
+                ulong completeTime = (ulong)(selfEndDateTime - selfStartDateTime).TotalMilliseconds;
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                    CachedPlayer.LocalPlayer.PlayerControl.NetId,
+                    (byte)CustomRPC.TaskVsMode_AllTaskCompleted,
+                    Hazel.SendOption.Reliable,
+                    -1);
+                writer.Write(self.player.PlayerId);
+                writer.Write(completeTime);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.taskVsModeAllTaskCompleted(self.player.PlayerId, completeTime);
+            }
+
+            updateControl();
+        }
+
+        public static void updateControl() {
+            updateVisible();
+            sortTaskRacers();
+
+            bool isEnd = true;
+            foreach (var p in taskRacers) {
+                if (!p.isTaskComplete()) {
+                    isEnd = false;
+                    break;
+                }
+            }
+            if (isEnd) {
+                triggerTaskVsModeEnd = true;
+            }
+        }
+
+        public static void update() {
+            if (!isValid()) return;
+
+            if (hostTaskTypeIds != null && CustomOptionHolder.taskVsModeEnabledMakeItTheSameTaskAsTheHost.getBool()) {
+                applyHostTasks();
+            }
+
+            // Start Direction
+            if (startTime > 0.0f) {
+                startTime = Mathf.Max(0, startTime - Time.unscaledDeltaTime);
+                int t = (int)Math.Floor(startTime) + 1;
+                if (timeSecOld != t) {
+                    timeSecOld = t;
+                    if (Modules.ModUpdateBehaviour.selectSfx != null)
+                        SoundManager.Instance.PlaySound(Modules.ModUpdateBehaviour.selectSfx, false, 1.0f);
+                }
+                startText.text = t.ToString();
+                float scale = Mathf.Lerp(1.0f, 1.5f, 1.0f - (startTime % 1.0f));
+                startText.transform.localScale = new Vector3(scale, scale, scale);
+                if (startTime == 0.0f) {
+                    _canMove = true;
+                    fadeTime = 1.5f;
+                    SoundManager.Instance.PlaySound(DestroyableSingleton<HudManager>.Instance.TaskCompleteSound, false, 0.8f);
+                    timerText.gameObject.SetActive(true);
+                    selfStartDateTime = DateTime.Now;
+                }
+            } else if (fadeTime > 0.0f) {
+                startText.text = "GO!!";
+                fadeTime = Mathf.Max(0, fadeTime - Time.unscaledDeltaTime);
+                float scale = Mathf.Lerp(1.0f, 1.5f, 1 - (fadeTime / 1.5f));
+                startText.transform.localScale = new Vector3(scale, scale, scale);
+                startText.color = new Color(color.r, color.g, color.b, fadeTime / 1.5f);
+            }
+
+            // Timer
+            if (_canMove) {
+                if (self.taskCompleteTime != ulong.MaxValue) {
+                    timerText.text = string.Format("TIME {0:D2}:{1:D2}:{2:D3}", self.taskCompleteTime / 60000, (self.taskCompleteTime / 1000) % 60, self.taskCompleteTime % 1000);
+                } else {
+                    var timeSpan = (self.isTaskComplete() ? selfEndDateTime : DateTime.Now) - selfStartDateTime;
+                    timerText.text = string.Format("TIME {0:D2}:{1:D2}:{2:D3}", (int)timeSpan.TotalMinutes, (int)timeSpan.TotalSeconds % 60, (int)timeSpan.TotalMilliseconds % 1000);
+                }
+            }
+
+            // Move
+            for (int i = moveInfoList.Count - 1; i >= 0; --i) {
+                if (!moveInfoList[i].update())
+                    moveInfoList.RemoveAt(i);
+            }
+        }
+
+        public static void onRetireStart(Vector2 pos) {
+            retireStartPos = pos;
+        }
+
+        public static bool isRetireCancel(Vector2 pos) {
+            return retireStartPos != pos;
+        }
+
+        public static bool isValid() {
+            return taskRacers.Count > 0;
+        }
+
+        public static bool isTaskRacer(PlayerControl p) {
+            return getTaskRacer(p.PlayerId) != null;
+        }
+
+        public static bool isTaskRacer(byte playerId) {
+            return getTaskRacer(playerId) != null;
+        }
+
+        public static Info getTaskRacer(byte playerId) {
+            for (int i = 0; i < taskRacers.Count; ++i) {
+                if (taskRacers[i].player.PlayerId == playerId)
+                    return taskRacers[i];
+            }
+            return null;
+        }
+
+        public static bool canMove() {
+            return _canMove;
+        }
+
+        public static bool isReadyAll() {
+            return getTaskRacerReadyCount() == getTaskRacerMaxCount();
+        }
+
+        public static int getTaskRacerReadyCount() {
+            int count = 0;
+            for (int i = 0; i < taskRacers.Count; ++i) {
+                if (taskRacers[i].isReady || taskRacers[i].player.notRealPlayer)
+                    ++count;
+            }
+            return count;
+        }
+
+        public static int getTaskRacerMaxCount() {
+            return taskRacers.Count;
+        }
+
+        public static void addTaskRacer(PlayerControl p) {
+            if (getTaskRacer(p.PlayerId) != null) return;
+            taskRacers.Add(new Info(p));
+        }
+
+        public static void clearAndReload() {
+            taskRacers.Clear();
+            moveInfoList.Clear();
+            rankUIPositions.Clear();
+            if (startText != null && startText.gameObject != null) UnityEngine.Object.Destroy(startText.gameObject);
+            startText = null;
+            if (timerText != null && timerText.gameObject != null) UnityEngine.Object.Destroy(timerText.gameObject);
+            timerText = null;
+            startTime = 0.0f;
+            fadeTime = 0.0f;
+            timeSecOld = -1;
+            _canMove = false;
+            triggerTaskVsModeEnd = false;
+            self = null;
+            selfStartDateTime = default;
+            selfEndDateTime = default;
+            hostTaskTypeIds = null;
+            hostTaskIdDataTable.Clear();
+            for (int i = 0; i < rankGameSpriteRenderer.Length; ++i) {
+                if (rankGameSpriteRenderer[i] != null && rankGameSpriteRenderer[i].gameObject != null)
+                    UnityEngine.Object.Destroy(rankGameSpriteRenderer[i].gameObject);
+            }
+            for (int i = 0; i < rankMarkObjects.Length; ++i) {
+                if (rankMarkObjects[i] != null && rankMarkObjects[i].gameObject != null)
+                    UnityEngine.Object.Destroy(rankMarkObjects[i].gameObject);
+            }
+            foreach (var mark in taskFinishedMarkTable) {
+                if (mark.Value != null)
+                    UnityEngine.Object.Destroy(mark.Value);
+            }
+            taskFinishedMarkTable.Clear();
+            vision = CustomOptionHolder.taskVsModeVision.getFloat();
+        }
+
+        public static void onReady(Info taskRacer) {
+            if (taskRacer == null) return;
+            taskRacer.isReady = true;
+            if (startText != null)
+                startText.text = string.Format("Waiting for participants...({0}/{1})", getTaskRacerReadyCount(), getTaskRacerMaxCount());
+
+            if (AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost && isReadyAll()) {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                    CachedPlayer.LocalPlayer.PlayerControl.NetId,
+                    (byte)CustomRPC.TaskVsMode_Start,
+                    Hazel.SendOption.Reliable,
+                    -1);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.taskVsModeStart();
+            }
+        }
+
+        public static void onDisconnect(Info taskRacer) {
+            if (taskRacer == null) return;
+            if (!taskRacer.isReady)
+                onReady(taskRacer);
+
+            updateControl();
+        }
+
+        static void updateVisible() {
+            foreach (var taskRacer in taskRacers) {
+                taskFinishedMarkTable[taskRacer.player.PlayerId].SetActive(!taskRacer.player.isDead() && taskRacer.taskCompleteCount != -1 && taskRacer.taskCount == taskRacer.taskCompleteCount);
+                MapOptions.playerIcons[taskRacer.player.PlayerId].setSemiTransparent(taskRacer.player.isDead());
+            }
+        }
+
+        static void sortTaskRacers() {
+            var taskRacersOld = new List<Info>();
+            taskRacersOld.AddRange(taskRacers);
+            taskRacers.Sort((a, b) => {
+                bool isAliveA = a.player.isAlive();
+                bool isAliveB = b.player.isAlive();
+                if (isAliveA && !isAliveB) return -1;
+                if (!isAliveA && isAliveB) return 1;
+
+                if (a.taskCompleteTime != ulong.MaxValue && b.taskCompleteTime == ulong.MaxValue) return -1;
+                if (a.taskCompleteTime == ulong.MaxValue && b.taskCompleteTime != ulong.MaxValue) return 1;
+                if (a.taskCompleteTime != ulong.MaxValue && b.taskCompleteTime != ulong.MaxValue) {
+                    if (a.taskCompleteTime < b.taskCompleteTime) return -1;
+                    if (a.taskCompleteTime > b.taskCompleteTime) return 1;
+                }
+
+                int sortOrder = b.taskCompleteCount - a.taskCompleteCount;
+                if (sortOrder != 0) return sortOrder;
+
+                return 0;
+            });
+
+            int taskRacersCount = taskRacersOld.Count;
+            for (int i = 0; i < taskRacersCount; ++i) {
+                if (taskRacersOld[i] == taskRacers[i]) continue;
+                for (int j = 0; j < taskRacersCount; ++j) {
+                    if (taskRacersOld[i] != taskRacers[j]) continue;
+                    var p = MapOptions.playerIcons[taskRacersOld[i].player.PlayerId];
+                    for (int k = 0; k < moveInfoList.Count; ++k) {
+                        if (moveInfoList[k].moveObj == p) {
+                            moveInfoList.RemoveAt(k);
+                            break;
+                        }
+                    }
+                    moveInfoList.Add(new MoveInfo(p.transform, rankUIPositions[j], 0.6f));
+
+                    var p2 = taskFinishedMarkTable[taskRacersOld[i].player.PlayerId];
+                    for (int k = 0; k < moveInfoList.Count; ++k) {
+                        if (moveInfoList[k].moveObj == p2) {
+                            moveInfoList.RemoveAt(k);
+                            break;
+                        }
+                    }
+                    moveInfoList.Add(new MoveInfo(p2.transform, rankUIPositions[j], 0.6f));
+                }
+            }
+        }
+
+        static Sprite retireSprite = null;
+        public static Sprite getRetireSprites() {
+            if (retireSprite == null)
+                retireSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TaskVsMode_RetireButton.png", 115f);
+            return retireSprite;
+        }
+
+        static Sprite taskFinishedSprite = null;
+        public static Sprite getTaskFinishedSprites() {
+            if (taskFinishedSprite == null)
+                taskFinishedSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TaskVsMode_Finished.png", 115f);
+            return taskFinishedSprite;
+        }
+
+        static Sprite[] rankGameSprites = new Sprite[3];
+        public static Sprite getRankGameSprites(int rank) {
+            if (rank < 1 || rank > 3) return null;
+            int index = rank - 1;
+            if (rankGameSprites[index]) return rankGameSprites[index];
+
+            int id = 0;
+            switch (rank) {
+                case 1: id = 11; break;
+                case 2: id = 12; break;
+                case 3: id = 13; break;
+            }
+            rankGameSprites[index] = Helpers.loadSpriteFromResources(String.Format("TheOtherRoles.Resources.TaskVsMode_{0:d2}.png", id), 115f);
+            return rankGameSprites[index];
+        }
+
+        public static void setHostTasks(byte[] taskTypeIds) {
+            hostTaskTypeIds = taskTypeIds;
+        }
+
+        public static void setHostTaskDetail(uint taskId, byte[] data) {
+            hostTaskIdDataTable.Add(taskId, data);
+        }
+
+        static void applyHostTasks() {
+            if (hostTaskTypeIds == null || hostTaskTypeIds.Length == 0) return;
+
+            for (int i = 0; i < taskRacers.Count; ++i) {
+                var playerData = taskRacers[i].player.Data;
+                playerData.Object.clearAllTasks();
+                playerData.Tasks = new Il2CppSystem.Collections.Generic.List<GameData.TaskInfo>(hostTaskTypeIds.Length);
+                for (int j = 0; j < hostTaskTypeIds.Length; j++) {
+                    playerData.Tasks.Add(new GameData.TaskInfo(hostTaskTypeIds[j], (uint)j));
+                    playerData.Tasks[j].Id = (uint)j;
+                }
+                for (int j = 0; j < playerData.Tasks.Count; j++) {
+                    GameData.TaskInfo taskInfo = playerData.Tasks[j];
+                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(MapUtilities.CachedShipStatus.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
+                    normalPlayerTask.Id = taskInfo.Id;
+                    normalPlayerTask.Owner = playerData.Object;
+                    normalPlayerTask.Initialize();
+                    if (hostTaskIdDataTable.ContainsKey(normalPlayerTask.Id)) {
+                        normalPlayerTask.Data = hostTaskIdDataTable[normalPlayerTask.Id];
+                        switch (normalPlayerTask.TaskType) {
+                            case TaskTypes.FixWiring:
+                            case TaskTypes.VentCleaning:
+                                List<Console> list = (from t in MapUtilities.CachedShipStatus.AllConsoles
+                                                      where t.TaskTypes.Contains(normalPlayerTask.TaskType)
+                                                      select t).ToList();
+                                Console console = list.First((Console v) => v.ConsoleId == normalPlayerTask.Data[0]);
+                                normalPlayerTask.StartAt = console.Room;
+                                break;
+                        }
+                    }
+                    playerData.Object.myTasks.Add(normalPlayerTask);
+                }
+            }
+            hostTaskTypeIds = null;
+            hostTaskIdDataTable.Clear();
+        }
+    }
+
+    public static class KillerCreator {
+        public static Color color = Palette.ImpostorRed;
+        public static PlayerControl killerCreator;
+        public static PlayerControl currentTarget;
+        static Sprite killerReserveButtonSprite;
+
+
+        public static Sprite getKillerReserveButtonSprite() {
+            if (killerReserveButtonSprite) return killerReserveButtonSprite;
+            killerReserveButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.SidekickButton.png", 115f);
+            return killerReserveButtonSprite;
+        }
+
+        public static void clearAndReload() {
+            killerCreator = null;
+            currentTarget = null;
+        }
+    }
+
+    public static class MadmateKiller
+    {
+        public static Color color = Palette.ImpostorRed;
+        public static PlayerControl madmateKiller = null;
+        public static bool canEnterVents = false;
+        public static bool canMoveVents = false;
+        public static bool hasImpostorVision = false;
+        public static bool noticeImpostors = false;
+        public static bool canFixLightsTask = false;
+        public static bool canFixCommsTask = false;
+
+        public static void clearAndReload() {
+            madmateKiller = null;
+            canEnterVents = CustomOptionHolder.madmateKillerCanEnterVents.getBool();
+            canMoveVents = CustomOptionHolder.madmateKillerCanMoveVents.getBool();
+            hasImpostorVision = CustomOptionHolder.madmateKillerHasImpostorVision.getBool();
+            noticeImpostors = CustomOptionHolder.madmateKillerNoticeImpostors.getBool();
+            canFixLightsTask = CustomOptionHolder.madmateKillerCanFixLightsTask.getBool();
+            canFixCommsTask = CustomOptionHolder.madmateKillerCanFixCommsTask.getBool();
         }
     }
 
@@ -1558,7 +2586,6 @@ namespace TheOtherRoles
     public static class Bait {
         public static List<PlayerControl> bait = new List<PlayerControl>();
         public static Dictionary<DeadPlayer, float> active = new Dictionary<DeadPlayer, float>();
-        public static Color color = new Color32(0, 247, 255, byte.MaxValue);
 
         public static float reportDelayMin = 0f;
         public static float reportDelayMax = 0f;

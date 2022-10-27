@@ -14,6 +14,23 @@ namespace TheOtherRoles.Patches {
     class HudManagerUpdatePatch
     {
         private static Dictionary<byte, (string name, Color color)> TagColorDict = new();
+        private static bool CanPlayerSeeImpostorName()
+        {
+            if (CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor)
+                return true;
+
+            if (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == CachedPlayer.LocalPlayer.PlayerControl && MadmateKiller.noticeImpostors)
+                return true;
+
+            if (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl && Madmate.noticeImpostors)
+			{
+                var (playerCompleted, playerTotal) = TasksHandler.taskInfo(Madmate.madmate.Data, true);
+                return playerTotal - playerCompleted <= 0;
+            }
+
+            return false;
+        }
+
         static void resetNameTagsAndColors() {
             var localPlayer = CachedPlayer.LocalPlayer.PlayerControl;
             var myData = CachedPlayer.LocalPlayer.Data;
@@ -58,6 +75,19 @@ namespace TheOtherRoles.Patches {
                     text.color = data.color;
                 }
             }
+            if (CanPlayerSeeImpostorName()) {
+                List<PlayerControl> impostors = PlayerControl.AllPlayerControls.ToArray().ToList();
+                impostors.RemoveAll(x => !x.Data.Role.IsImpostor);
+                foreach (PlayerControl player in impostors)
+                    player.cosmetics.nameText.color = Palette.ImpostorRed;
+                if (MeetingHud.Instance != null)
+                    foreach (PlayerVoteArea player in MeetingHud.Instance.playerStates) {
+                        PlayerControl playerControl = Helpers.playerById((byte)player.TargetPlayerId);
+                        if (playerControl != null && playerControl.Data.Role.IsImpostor)
+                            player.NameText.color =  Palette.ImpostorRed;
+                    }
+            }
+
         }
 
         static void setPlayerNameColor(PlayerControl p, Color color) {
@@ -138,11 +168,24 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Medium.medium, Medium.color);
             } else if (Trapper.trapper != null && Trapper.trapper == localPlayer) {
                 setPlayerNameColor(Trapper.trapper, Trapper.color);
+            } else if (Madmate.madmate != null && Madmate.madmate == localPlayer) {
+                setPlayerNameColor(Madmate.madmate, Madmate.color);
             } else if (Lawyer.lawyer != null && Lawyer.lawyer == localPlayer) {
                 setPlayerNameColor(Lawyer.lawyer, Lawyer.color);
             } else if (Pursuer.pursuer != null && Pursuer.pursuer == localPlayer) {
                 setPlayerNameColor(Pursuer.pursuer, Pursuer.color);
-            }*/
+            } else if (Yasuna.yasuna != null && Yasuna.yasuna == localPlayer) {
+                setPlayerNameColor(Yasuna.yasuna, localPlayer.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color);
+            } else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == localPlayer) {
+                setPlayerNameColor(TaskMaster.taskMaster, !TaskMaster.becomeATaskMasterWhenCompleteAllTasks || TaskMaster.isTaskComplete ? TaskMaster.color : RoleInfo.crewmate.color);
+            } else if (Kataomoi.kataomoi != null && Kataomoi.kataomoi == localPlayer) {
+                setPlayerNameColor(Kataomoi.kataomoi, Kataomoi.color);
+                if (Kataomoi.target != null)
+                    setPlayerNameColor(Kataomoi.target, Kataomoi.color);
+            } else if (TaskRacer.isValid()) {
+                for (int i = 0; i < TaskRacer.taskRacers.Count; ++i)
+                    setPlayerNameColor(TaskRacer.taskRacers[i].player, TaskRacer.getRankTextColor(i + 1));
+            }
 
             // No else if here, as a Lover of team Jackal needs the colors
             if (Sidekick.sidekick != null && Sidekick.sidekick == localPlayer) {
@@ -165,7 +208,7 @@ namespace TheOtherRoles.Patches {
             }
 
             // Crewmate roles with no changes: Mini
-            // Impostor roles with no changes: Morphling, Camouflager, Vampire, Godfather, Eraser, Janitor, Cleaner, Warlock, BountyHunter,  Witch and Mafioso
+            // Impostor roles with no changes: Morphling, Camouflager, Vampire, Godfather, Eraser, Janitor, Cleaner, Warlock, BountyHunter,  Witch and Mafioso, DoorHacker, KillerCreator, MadmateKiller
         }
 
         static void setNameTags() {
@@ -317,6 +360,19 @@ namespace TheOtherRoles.Patches {
         static void updateMapButton(HudManager __instance) {
             if (Trapper.trapper == null || !(CachedPlayer.LocalPlayer.PlayerId == Trapper.trapper.PlayerId) || __instance == null || __instance.MapButton == null) return;
             __instance.MapButton.color = Trapper.playersOnMap.Any() ? Trapper.color : Color.white;
+
+        static void updateTaskRacer(HudManager __instance)
+        {
+            // Task Vs Mode
+            if (!TaskRacer.isValid()) return;
+
+            __instance.UseButton.ToggleVisible(MapBehaviour.Instance == null || !MapBehaviour.Instance.IsOpen);
+            __instance.AbilityButton.ToggleVisible(false);
+            __instance.ReportButton.ToggleVisible(false);
+            __instance.KillButton.ToggleVisible(false);
+            __instance.SabotageButton.ToggleVisible(false);
+            __instance.ImpostorVentButton.ToggleVisible(false);
+
         }
 
         static void Postfix(HudManager __instance)
@@ -344,6 +400,8 @@ namespace TheOtherRoles.Patches {
             updateUseButton(__instance);
             updateMapButton(__instance);
 
+            // Task Vs Mode
+            updateTaskRacer(__instance);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TheOtherRoles.Utilities;
 using UnityEngine;
 
 namespace TheOtherRoles{
@@ -8,6 +9,7 @@ namespace TheOtherRoles{
         public static bool blockSkippingInEmergencyMeetings = false;
         public static bool noVoteIsSelfVote = false;
         public static bool hidePlayerNames = false;
+        public static bool hideOutOfSightNametags = false;
         public static bool ghostsSeeRoles = true;
         public static bool ghostsSeeModifier = true;
         public static bool ghostsSeeTasks = true;
@@ -19,14 +21,25 @@ namespace TheOtherRoles{
         public static bool enableHorseMode = false;
         public static bool shieldFirstKill = false;
         public static CustomGamemodes gameMode = CustomGamemodes.Classic;
+        public static bool skeldPreventPlayerFromMovingDuringCleanO2FilterTask = false;
+
 
         // Updating values
         public static int meetingsCount = 0;
         public static List<SurvCamera> camerasToAdd = new List<SurvCamera>();
         public static List<Vent> ventsToSeal = new List<Vent>();
         public static Dictionary<byte, PoolablePlayer> playerIcons = new Dictionary<byte, PoolablePlayer>();
+        public static float adminTimer = 0f;
+        public static float vitalsTimer = 0f;
+        public static float securityCameraTimer = 0f;
+        public static TMPro.TextMeshPro adminTimerText = null;
         public static string firstKillName;
         public static PlayerControl firstKillPlayer;
+        public static TMPro.TextMeshPro vitalsTimerText = null;
+        public static TMPro.TextMeshPro securityCameraTimerText = null;
+
+        const float TimerUIBaseX = -3.5f;
+        const float TimerUIMoveX = 2.5f;
 
         public static void clearAndReloadMapOptions() {
             meetingsCount = 0;
@@ -34,13 +47,21 @@ namespace TheOtherRoles{
             ventsToSeal = new List<Vent>();
             playerIcons = new Dictionary<byte, PoolablePlayer>(); ;
 
+            adminTimer = CustomOptionHolder.adminTimer.getFloat();
+            vitalsTimer = CustomOptionHolder.vitalsTimer.getFloat();
+            securityCameraTimer = CustomOptionHolder.securityCameraTimer.getFloat();
+
+            UpdateTimer();
+
             maxNumberOfMeetings = Mathf.RoundToInt(CustomOptionHolder.maxNumberOfMeetings.getSelection());
             blockSkippingInEmergencyMeetings = CustomOptionHolder.blockSkippingInEmergencyMeetings.getBool();
             noVoteIsSelfVote = CustomOptionHolder.noVoteIsSelfVote.getBool();
             hidePlayerNames = CustomOptionHolder.hidePlayerNames.getBool();
+            hideOutOfSightNametags = CustomOptionHolder.hideOutOfSightNametags.getBool();
             allowParallelMedBayScans = CustomOptionHolder.allowParallelMedBayScans.getBool();
             shieldFirstKill = CustomOptionHolder.shieldFirstKill.getBool();
             firstKillPlayer = null;
+            skeldPreventPlayerFromMovingDuringCleanO2FilterTask = CustomOptionHolder.skeldPreventPlayerFromMovingDuringCleanO2FilterTask.getBool();
         }
 
         public static void reloadPluginOptions() {
@@ -53,6 +74,103 @@ namespace TheOtherRoles{
             enableSoundEffects = TheOtherRolesPlugin.EnableSoundEffects.Value;
             enableHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
             Patches.ShouldAlwaysHorseAround.isHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
+        }
+
+        public static void MeetingEndedUpdate()
+        {
+            UpdateTimer();
+        }
+
+        public static int UpdateAdminTimerText(int viewIndex)
+        {
+            if (!CustomOptionHolder.enabledAdminTimer.getBool() || !CustomOptionHolder.viewAdminTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
+                return viewIndex;
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
+                return viewIndex;
+            adminTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            adminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (adminTimer > 0)
+                adminTimerText.text = $"Admin: {adminTimer.ToString("#0.0")} sec remaining";
+            else
+                adminTimerText.text = "Admin: ran out of time";
+            adminTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
+        }
+
+        private static void ClearAdminTimerText()
+        {
+            if (adminTimerText == null)
+                return;
+            UnityEngine.Object.Destroy(adminTimerText);
+            adminTimerText = null;
+        }
+
+        public static int UpdateVitalsTimerText(int viewIndex) {
+            if (!CustomOptionHolder.enabledVitalsTimer.getBool() || !CustomOptionHolder.viewVitalsTimer.getBool() ||  CustomOptionHolder.enabledTaskVsMode.getBool())
+                return viewIndex;
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
+                return viewIndex;
+            vitalsTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            vitalsTimerText.color = Color.green;
+            vitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (vitalsTimer > 0)
+                vitalsTimerText.text = $"Vitals: {vitalsTimer.ToString("#0.0")} sec remaining";
+            else
+                vitalsTimerText.text = "Vitals: ran out of time";
+            vitalsTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
+        }
+
+        private static void ClearVitalsTimerText() {
+            if (vitalsTimerText == null)
+                return;
+            UnityEngine.Object.Destroy(vitalsTimerText);
+            vitalsTimerText = null;
+        }
+
+
+        public static int UpdateSecurityCameraTimerText(int viewIndex) {
+            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool() || !CustomOptionHolder.viewSecurityCameraTimer.getBool() ||  CustomOptionHolder.enabledTaskVsMode.getBool())
+                return viewIndex;
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
+                return viewIndex;
+            securityCameraTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            securityCameraTimerText.color = Color.red;
+            securityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (securityCameraTimer > 0)
+                securityCameraTimerText.text = $"Camera: {securityCameraTimer.ToString("#0.0")} sec remaining";
+            else
+                securityCameraTimerText.text = "Camera: ran out of time";
+            securityCameraTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
+        }
+
+        private static void ClearSecurityCameraTimerText() {
+            if (securityCameraTimerText == null)
+                return;
+            UnityEngine.Object.Destroy(securityCameraTimerText);
+            securityCameraTimerText = null;
+        }
+
+
+        private static void UpdateTimer() {
+
+            int viewIndex = 0;
+            ClearAdminTimerText();
+            viewIndex = UpdateAdminTimerText(viewIndex);
+
+            if (Helpers.existVitals()) {
+                ClearVitalsTimerText();
+                viewIndex = UpdateVitalsTimerText(viewIndex);
+            }
+
+            if (Helpers.existSecurityCamera()) {
+                ClearSecurityCameraTimerText();
+                viewIndex = UpdateSecurityCameraTimerText(viewIndex);
+            }
         }
     }
 }

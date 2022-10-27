@@ -5,10 +5,12 @@ using TheOtherRoles.CustomGameModes;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using UnityEngine;
+using static UnityEngine.UI.Button;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]
     public static class CredentialsPatch {
+
         public static string fullCredentialsVersion = 
 $@"<size=130%><color=#ff351f>TheOtherRoles</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays>0 ? "-BETA": "")}";
 public static string fullCredentials =
@@ -19,6 +21,7 @@ Design by <color=#FCCE03FF>Bavari</color></size>";
     public static string mainMenuCredentials = 
 $@"Modded by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, <color=#FCCE03FF>EndOfFile</color>, <color=#FCCE03FF>Mallöris</color> & <color=#FCCE03FF>Gendelo</color>
 Design by <color=#FCCE03FF>Bavari</color>";
+
 
         public static string contributorsCredentials =
 $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
@@ -32,7 +35,9 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
 
                 var credentials = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(__instance.text);
                 credentials.transform.position = new Vector3(0, 0, 0);
-                credentials.SetText($"v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n<size=30f%>\n</size>{mainMenuCredentials}\n<size=30%>\n</size>{contributorsCredentials}");
+
+                credentials.SetText($"MRエディション v{TheOtherRolesPlugin.Version.ToString()}\n<size=30f%>\n</size>{mainMenuCredentials}\n<size=30%>\n</size>{contributorsCredentials}");
+
                 credentials.alignment = TMPro.TextAlignmentOptions.Center;
                 credentials.fontSize *= 0.75f;
 
@@ -41,10 +46,13 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
         }
 
         [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
-        internal static class PingTrackerPatch
+        public static class PingTrackerPatch
         {
             public static GameObject modStamp;
-            /*static void Prefix(PingTracker __instance) {
+
+            public static GameObject customPreset;
+            static void Prefix(PingTracker __instance) {
+
                 if (modStamp == null) {
                     modStamp = new GameObject("ModStamp");
                     var rend = modStamp.AddComponent<SpriteRenderer>();
@@ -53,18 +61,48 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
                     modStamp.transform.parent = __instance.transform.parent;
                     modStamp.transform.localScale *= SubmergedCompatibility.Loaded ? 0 : 0.6f;
                 }
+                if (customPreset == null) {
+                    var buttonBehaviour = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.GameMenu.CensorChatButton);
+                    buttonBehaviour.Text.text = "";
+                    buttonBehaviour.Background.sprite = TheOtherRolesPlugin.GetCustomPreset();
+                    buttonBehaviour.Background.color = new Color(1, 1, 1, 1);
+                    customPreset = buttonBehaviour.gameObject;
+                    customPreset.name = "CustomPreset";
+                    customPreset.transform.parent = __instance.transform.parent;
+                    customPreset.transform.localScale = new Vector3(0.2f, 1.2f, 1.2f) * 1.2f;
+                    customPreset.SetActive(true);
+                    var button = buttonBehaviour.GetComponent<PassiveButton>();
+                    button.ClickSound = null;
+                    button.OnMouseOver = new UnityEngine.Events.UnityEvent();
+                    button.OnMouseOut = new UnityEngine.Events.UnityEvent();
+                    button.OnClick = new ButtonClickedEvent();
+                    button.OnClick.AddListener((Action)(() => {
+                        ClientOptionsPatch.isOpenPreset = true;
+                        FastDestroyableSingleton<HudManager>.Instance.GameMenu.Open();
+                    }));
+                }
                 float offset = (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) ? 0.75f : 0f;
                 modStamp.transform.position = FastDestroyableSingleton<HudManager>.Instance.MapButton.transform.position + Vector3.down * offset;
-            }*/
+
+                if (customPreset) {
+                    customPreset.transform.position = modStamp.transform.position + Vector3.down * 0.75f;
+                    if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && customPreset.gameObject.activeSelf)
+                        customPreset.gameObject.SetActive(false);
+                }
+
+            }
+
 
             static void Postfix(PingTracker __instance){
                 __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) {
+
                     string gameModeText = $"";
                     if (HideNSeek.isHideNSeekGM) gameModeText = $"Hide 'N Seek";
                     else if (HandleGuesser.isGuesserGm) gameModeText = $"Guesser";
                     if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
-                    __instance.text.text = $"<size=130%><color=#ff351f>TheOtherRoles</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n{gameModeText}" + __instance.text.text;
+                    __instance.text.text = $"<size=130%><color=#ff351f>TheOtherRoles MR</color></size> v{TheOtherRolesPlugin.Version.ToString()}\n" + __instance.text.text;
+
                     if (CachedPlayer.LocalPlayer.Data.IsDead || (!(CachedPlayer.LocalPlayer.PlayerControl == null) && (CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 || CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover2))) {
                         __instance.transform.localPosition = new Vector3(3.45f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
                     } else {
@@ -105,6 +143,9 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
                 instance = __instance;
                 loadSprites();
                 renderer.sprite = MapOptions.enableHorseMode ? horseBannerSprite : bannerSprite;
+
+                // Task Vs Mode
+                TaskRacer.clearAndReload();
             }
 
             public static void loadSprites() {

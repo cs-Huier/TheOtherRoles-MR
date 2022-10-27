@@ -14,6 +14,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.CalculateLightRadius))]
         public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] GameData.PlayerInfo player) {
+
             if (!__instance.Systems.ContainsKey(SystemTypes.Electrical)) return true;
 
             
@@ -24,6 +25,29 @@ namespace TheOtherRoles.Patches {
                     __result = GetNeutralLightRadius(__instance, true);
                     return false;
                 }
+
+            ISystemType systemType = __instance.Systems.ContainsKey(SystemTypes.Electrical) ? __instance.Systems[SystemTypes.Electrical] : null;
+            if (systemType == null) return true;
+            SwitchSystem switchSystem = systemType.TryCast<SwitchSystem>();
+            if (switchSystem == null) return true;
+
+            float num = (float)switchSystem.Value / 255f;
+
+            if (player == null || player.IsDead) // IsDead
+                __result = __instance.MaxLightRadius;
+            else if (TaskRacer.isValid())
+                __result = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, num) * TaskRacer.vision;
+            else if (player.Role.IsImpostor
+                || (Jackal.jackal != null && Jackal.jackal.PlayerId == player.PlayerId && Jackal.hasImpostorVision)
+                || (Sidekick.sidekick != null && Sidekick.sidekick.PlayerId == player.PlayerId && Sidekick.hasImpostorVision)
+                || (Madmate.madmate != null && Madmate.madmate.PlayerId == player.PlayerId && Madmate.hasImpostorVision)
+                || (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller.PlayerId == player.PlayerId && MadmateKiller.hasImpostorVision)
+                || (Spy.spy != null && Spy.spy.PlayerId == player.PlayerId && Spy.hasImpostorVision)
+                || (Jester.jester != null && Jester.jester.PlayerId == player.PlayerId && Jester.hasImpostorVision)) {
+                //__result = __instance.MaxLightRadius * PlayerControl.GameOptions.ImpostorLightMod;
+                __result = GetNeutralLightRadius(__instance, true);
+                return false;
+
             }
 
             // If player is Lighter with ability active
@@ -129,10 +153,18 @@ namespace TheOtherRoles.Patches {
             PlayerControl.GameOptions.NumLongTasks = originalNumLongTasksOption;
         }
 
+
         public static void resetVanillaSettings() {
             PlayerControl.GameOptions.ImpostorLightMod = originalNumImpVisionOption;
             PlayerControl.GameOptions.CrewLightMod = originalNumCrewVisionOption;
             PlayerControl.GameOptions.KillCooldown = originalNumKillCooldownOption;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.SpawnPlayer))]
+        public static void Postfix(ShipStatus __instance, PlayerControl player, int numPlayers, bool initialSpawn)
+        {
+			Objects.CustomButton.stopCountdown = false;
+
         }
     }
 }

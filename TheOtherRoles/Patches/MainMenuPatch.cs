@@ -7,9 +7,11 @@ using static UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 using TheOtherRoles.Patches;
 
-namespace TheOtherRoles.Modules {
+namespace TheOtherRoles.Modules
+{
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
-    public class MainMenuPatch {
+    public class MainMenuPatch
+    {
         private static bool horseButtonState = MapOptions.enableHorseMode;
         private static Sprite horseModeOffSprite = null;
         private static Sprite horseModeOnSprite = null;
@@ -21,29 +23,8 @@ namespace TheOtherRoles.Modules {
             var template = GameObject.Find("ExitGameButton");
             if (template == null) return;
 
-            var buttonDiscord = UnityEngine.Object.Instantiate(template, null);
-            buttonDiscord.transform.localPosition = new Vector3(buttonDiscord.transform.localPosition.x, buttonDiscord.transform.localPosition.y + 0.6f, buttonDiscord.transform.localPosition.z);
-
-            var textDiscord = buttonDiscord.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
-            __instance.StartCoroutine(Effects.Lerp(0.1f, new System.Action<float>((p) => {
-                textDiscord.SetText("Discord");
-            })));
-
-            PassiveButton passiveButtonDiscord = buttonDiscord.GetComponent<PassiveButton>();
-            SpriteRenderer buttonSpriteDiscord = buttonDiscord.GetComponent<SpriteRenderer>();
-
-            passiveButtonDiscord.OnClick = new Button.ButtonClickedEvent();
-            passiveButtonDiscord.OnClick.AddListener((System.Action)(() => Application.OpenURL("https://discord.gg/77RkMJHWsM")));
-
-            Color discordColor = new Color32(88, 101, 242, byte.MaxValue);
-            buttonSpriteDiscord.color = textDiscord.color = discordColor;
-            passiveButtonDiscord.OnMouseOut.AddListener((System.Action)delegate {
-                buttonSpriteDiscord.color = textDiscord.color = discordColor;
-            });
-
-
             // Horse mode stuff
-            var horseModeSelectionBehavior = new ClientOptionsPatch.SelectionBehaviour("Enable Horse Mode", () => MapOptions.enableHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value = !TheOtherRolesPlugin.EnableHorseMode.Value, TheOtherRolesPlugin.EnableHorseMode.Value);
+            var horseModeSelectionBehavior = new SelectionBehaviour("Enable Horse Mode", () => MapOptions.enableHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value = !TheOtherRolesPlugin.EnableHorseMode.Value, TheOtherRolesPlugin.EnableHorseMode.Value);
 
             bottomTemplate = GameObject.Find("InventoryButton");
             if (bottomTemplate == null) return;
@@ -57,9 +38,8 @@ namespace TheOtherRoles.Modules {
             spriteHorseButton.sprite = horseButtonState ? horseModeOnSprite : horseModeOffSprite;
 
             passiveHorseButton.OnClick = new ButtonClickedEvent();
-
-            passiveHorseButton.OnClick.AddListener((System.Action)delegate {
-                horseButtonState = horseModeSelectionBehavior.OnClick();
+            passiveHorseButton.OnClick.AddListener((Action)(() => {
+                horseButtonState = horseModeSelectionBehavior.onClick();
                 if (horseButtonState) {
                     if (horseModeOnSprite == null) horseModeOnSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.HorseModeButtonOn.png", 75f);
                     spriteHorseButton.sprite = horseModeOnSprite;
@@ -74,7 +54,7 @@ namespace TheOtherRoles.Modules {
                     particles.pool.ReclaimAll();
                     particles.Start();
                 }
-            });
+            }));
 
             // TOR credits button
             if (bottomTemplate == null) return;
@@ -154,8 +134,8 @@ Goose-Goose-Duck - Idea for the Vulture role came from Slushiegoose</size>";
         {
             if (ModUpdateBehaviour.showPopUp || updateData == null) return true;
 
-            var text = __instance.AnnounceTextMeshPro;            
-            text.text = $"<size=150%><color=#FC0303>THE OTHER ROLES </color> {(updateData.Tag)}\n{(updateData.Content)}";
+            var text = __instance.AnnounceTextMeshPro;
+            text.text = $"<size=150%><color=#FC0303>THE OTHER ROLES MR</color></size> {(updateData.Version)}\n{(updateData.Content)}";
 
             return false;
         }

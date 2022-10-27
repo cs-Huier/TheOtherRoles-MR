@@ -26,12 +26,50 @@ namespace TheOtherRoles.Patches {
             }
             if (Medic.usedShield) Medic.meetingAfterShielding = true;  // Has to be after the setting of the shield
 
+            // Madmate exiled
+            if (Madmate.madmate != null
+                && AmongUsClient.Instance.AmHost
+                && Madmate.exileCrewmate
+                && exiled != null
+                && exiled.PlayerId == Madmate.madmate.PlayerId) {
+                // pick random crewmate
+                PlayerControl target = pickRandomCrewmate(exiled.PlayerId);
+                if (target != null) {
+                    // exile the picked crewmate
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId,
+                        (byte)CustomRPC.UncheckedExilePlayer,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    writer.Write(target.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.uncheckedExilePlayer(target.PlayerId);
+                }
+            }
+
             // Shifter shift
             if (Shifter.shifter != null && AmongUsClient.Instance.AmHost && Shifter.futureShift != null) { // We need to send the RPC from the host here, to make sure that the order of shifting and erasing is correct (for that reason the futureShifted and futureErased are being synced)
+                PlayerControl oldShifter = Shifter.shifter;
+                byte oldTaskMasterPlayerId = TaskMaster.isTaskMaster(Shifter.futureShift.PlayerId) && TaskMaster.isTaskComplete ? Shifter.futureShift.PlayerId : byte.MaxValue;
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShifterShift, Hazel.SendOption.Reliable, -1);
                 writer.Write(Shifter.futureShift.PlayerId);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.shifterShift(Shifter.futureShift.PlayerId);
+                if (TaskMaster.isTaskMaster(oldShifter.PlayerId)) {
+                    byte clearTasks = 0;
+                    for (int i = 0; i < oldShifter.Data.Tasks.Count; ++i) {
+                        if (oldShifter.Data.Tasks[i].Complete)
+                            ++clearTasks;
+                    }
+                    bool allTasksCompleted = clearTasks == oldShifter.Data.Tasks.Count;
+                    byte[] taskTypeIds = allTasksCompleted ? TaskMasterTaskHelper.GetTaskMasterTasks(oldShifter) : null;
+                    MessageWriter writer2 = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.TaskMasterSetExTasks, Hazel.SendOption.Reliable, -1);
+                    writer2.Write(oldShifter.PlayerId);
+                    writer2.Write(oldTaskMasterPlayerId);
+                    if (taskTypeIds != null)
+                        writer2.Write(taskTypeIds);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer2);
+                    RPCProcedure.taskMasterSetExTasks(oldShifter.PlayerId, oldTaskMasterPlayerId, taskTypeIds);
+                }
             }
             Shifter.futureShift = null;
 
@@ -96,6 +134,23 @@ namespace TheOtherRoles.Patches {
             }
             MapOptions.ventsToSeal = new List<Vent>();
         }
+
+        private static PlayerControl pickRandomCrewmate(int exiledPlayerId) {
+            var possibleTargets = new List<PlayerControl>();
+            // make possible targets
+            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
+                if (player.Data.Disconnected)
+                    continue;
+                if (player.Data.Role.IsImpostor)
+                    continue;
+                if (player.Data.IsDead)
+                    continue;
+                if (player.PlayerId == exiledPlayerId)
+                    continue;
+                possibleTargets.Add(player);
+            }
+            return possibleTargets[TheOtherRoles.rnd.Next(0, possibleTargets.Count)];
+        }
     }
 
     [HarmonyPatch]
@@ -142,6 +197,11 @@ namespace TheOtherRoles.Patches {
 
             // Reset custom button timers where necessary
             CustomButton.MeetingEndedUpdate();
+            MapOptions.MeetingEndedUpdate();
+
+            // Reset Yasuna settings.
+            if (Yasuna.yasuna != null)
+                Yasuna.specialVoteTargetPlayerId = byte.MaxValue;
 
             // Mini set adapted cooldown
             if (Mini.mini != null && CachedPlayer.LocalPlayer.PlayerControl == Mini.mini && Mini.mini.Data.Role.IsImpostor) {
@@ -264,6 +324,14 @@ namespace TheOtherRoles.Patches {
                     if (id == StringNames.ImpostorsRemainP || id == StringNames.ImpostorsRemainS) {
                         if (Jester.jester != null && player.PlayerId == Jester.jester.PlayerId) __result = "";
                     }
+
+                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue) {
+                        int index = __result.IndexOf("Ç™í«ï˙Ç≥ÇÍÇΩ");
+                        if (index != -1) {
+                            __result = player.Data.PlayerName + "Ç≥ÇÒÅIÇ‚ÇËÇ‹ÇµÇΩÇÀÇ•Å`ÅI";
+                        }
+                    }
+
                     if (Tiebreaker.isTiebreak) __result += " (Tiebreaker)";
                     Tiebreaker.isTiebreak = false;
                 }
