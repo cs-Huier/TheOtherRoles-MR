@@ -20,7 +20,9 @@ namespace TheOtherRoles{
         public static bool enableSoundEffects = true;
         public static bool enableHorseMode = false;
         public static bool shieldFirstKill = false;
+        public static CustomGamemodes gameMode = CustomGamemodes.Classic;
         public static bool skeldPreventPlayerFromMovingDuringCleanO2FilterTask = false;
+
 
         // Updating values
         public static int meetingsCount = 0;
