@@ -1,3 +1,4 @@
+
 # The Other Roles: MR Edition
 This mod is The Other Roles extension mod which implements new roles and systems based on [The Other Roles](https://github.com/Eisbison/TheOtherRoles)/[The Other Roles+](https://github.com/tomarai/TheOtherRoles).
 - **New Roles**
@@ -2065,3 +2066,4 @@ Each Hunter action or finished Crew task will lower the timer by a configurable 
 
 # Source code
 You can use parts of the code but don't copy paste the whole thing. Make sure you give credits to the other developers, because some parts of the code are based on theirs.
+
