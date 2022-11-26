@@ -1,10 +1,12 @@
-﻿global using UnhollowerBaseLib;
-global using UnhollowerBaseLib.Attributes;
-global using UnhollowerRuntimeLib;
+﻿global using Il2CppInterop.Runtime;
+global using Il2CppInterop.Runtime.Attributes;
+global using Il2CppInterop.Runtime.InteropTypes;
+global using Il2CppInterop.Runtime.InteropTypes.Arrays;
+global using Il2CppInterop.Runtime.Injection;
 
 using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.IL2CPP;
+using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using Hazel;
 using System.Collections.Generic;
@@ -14,18 +16,24 @@ using UnityEngine;
 using TheOtherRoles.Modules;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
-using TheOtherRoles.Objects;
+using Il2CppSystem.Security.Cryptography;
+using Il2CppSystem.Text;
+using Reactor.Networking.Attributes;
+using AmongUs.Data;
+using TheOtherRoles.Patches;
 
 namespace TheOtherRoles
 {
     [BepInPlugin(Id, "The Other Roles", VersionString)]
     [BepInDependency(SubmergedCompatibility.SUBMERGED_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInProcess("Among Us.exe")]
+    [ReactorModFlags(Reactor.Networking.ModFlags.RequireOnAllClients)]
     public class TheOtherRolesPlugin : BasePlugin
     {
         public const string Id = "me.eisbison.theotherroles";
 
-        public const string VersionString = "2.4.0";
+        public const string VersionString = "2.5.0";
+        public static uint betaDays = 0;  // amount of days for the build to be usable (0 for infinite!)
 
         public static System.Version Version = System.Version.Parse(VersionString);
         internal static BepInEx.Logging.ManualLogSource Logger;
@@ -33,10 +41,10 @@ namespace TheOtherRoles
         public Harmony Harmony { get; } = new Harmony(Id);
         public static TheOtherRolesPlugin Instance;
 
-        public static int optionsPage = 2;
+        public static int optionsPage = 1;
         public static int optionsPageMax = optionsPage + 1;
 
-        public static ConfigEntry<bool> DebugMode { get; private set; }
+        public static ConfigEntry<string> DebugMode { get; private set; }
         public static ConfigEntry<bool> ViewSeacretMode { get; private set; }
         public static ConfigEntry<bool> GhostsSeeTasks { get; set; }
         public static ConfigEntry<bool> GhostsSeeRoles { get; set; }
@@ -60,8 +68,6 @@ namespace TheOtherRoles
         public static void UpdateRegions() {
             ServerManager serverManager = FastDestroyableSingleton<ServerManager>.Instance;
             var regions = new IRegionInfo[] {
-                new DnsRegionInfo("mods.hopto.org", "Modded NA (MNA)", StringNames.NoTranslation, "mods.hopto.org", 443, false).CastFast<IRegionInfo>(),
-                new DnsRegionInfo("au-eu.duikbo.at", "Modded EU (MEU)", StringNames.NoTranslation, "au-eu.duikbo.at", 22023, false).CastFast<IRegionInfo>(),
                 new DnsRegionInfo(Ip.Value, "Custom", StringNames.NoTranslation, Ip.Value, Port.Value, false).CastFast<IRegionInfo>()
             };
             
@@ -87,8 +93,10 @@ namespace TheOtherRoles
         public override void Load() {
             Logger = Log;
             Instance = this;
-
-            DebugMode = Config.Bind("Custom", "Enable Debug Mode", false);
+#if false
+            Helpers.checkBeta(); // Exit if running an expired beta
+#endif
+            DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
             ViewSeacretMode = Config.Bind("Custom", "View Seacret Mode", false);
             GhostsSeeTasks = Config.Bind("Custom", "Ghosts See Remaining Tasks", true);
             GhostsSeeRoles = Config.Bind("Custom", "Ghosts See Roles", true);
@@ -106,15 +114,11 @@ namespace TheOtherRoles
 
             UpdateRegions();
 
-            GameOptionsData.RecommendedImpostors = GameOptionsData.MaxImpostors = Enumerable.Repeat(3, 16).ToArray(); // Max Imp = Recommended Imp = 3
-            GameOptionsData.MinPlayers = Enumerable.Repeat(4, 15).ToArray(); // Min Players = 4
-
-            DebugMode = Config.Bind("Custom", "Enable Debug Mode", false);
+            DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
             Harmony.PatchAll();
 
             CustomOptionHolder.Load();
             CustomColors.Load();
-            Patches.FreeNamePatch.Initialize();
 
             if (BepInExUpdater.UpdateRequired)
             {
@@ -148,8 +152,7 @@ namespace TheOtherRoles
     public static class ChatControllerAwakePatch {
         private static void Prefix() {
             if (!EOSManager.Instance.isKWSMinor) {
-                SaveManager.chatModeType = 1;
-                SaveManager.isGuest = false;
+                DataManager.Settings.Multiplayer.ChatMode = InnerNet.QuickChatModes.FreeChatOrQuickChat;
             }
         }
     }
@@ -158,42 +161,65 @@ namespace TheOtherRoles
     [HarmonyPatch(typeof(KeyboardJoystick), nameof(KeyboardJoystick.Update))]
     public static class DebugManager
     {
+        private static readonly string passwordHash = "7cd0fe883b2ef9e6079632d0bbcaa230194eeda5b8b8a57a15d59214e09fc358";
         private static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
         public static List<PlayerControl> bots = new List<PlayerControl>();
 
+        public static bool EnableDebugMode()
+		{
+            var builder = new StringBuilder();
+            SHA256 sha = SHA256Managed.Create();
+            Byte[] hashed = sha.ComputeHash(Encoding.UTF8.GetBytes(TheOtherRolesPlugin.DebugMode.Value));
+            foreach (var b in hashed)
+            {
+                builder.Append(b.ToString("x2"));
+            }
+            string enteredHash = builder.ToString();
+            return enteredHash == passwordHash;
+        }
+
         public static void Postfix(KeyboardJoystick __instance)
         {
-            if (!TheOtherRolesPlugin.DebugMode.Value) return;
-
-            // Spawn dummys
-            if (Input.GetKeyDown(KeyCode.F)) {
-                var playerControl = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
-                var i = playerControl.PlayerId = (byte) GameData.Instance.GetAvailableId();
-
-                bots.Add(playerControl);
-                GameData.Instance.AddPlayer(playerControl);
-                AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
-                
-                playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
-#if true
-                playerControl.GetComponent<DummyBehaviour>().enabled = true;
-                playerControl.NetTransform.enabled = false;
-#else
-                playerControl.GetComponent<DummyBehaviour>().enabled = false;
-                playerControl.isDummy = false;
-                playerControl.notRealPlayer = true;
-                playerControl.NetTransform.enabled = true;
-#endif
-                playerControl.SetName(RandomString(10));
-                playerControl.SetColor((byte) random.Next(Palette.PlayerColors.Length));
-                GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
+            if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
+            {
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.F5))
+                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.ForceEnd, false);
             }
 
-            // Terminate round
-            if(Input.GetKeyDown(KeyCode.L)) {
-                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ForceEnd, Hazel.SendOption.Reliable, -1);
-                AmongUsClient.Instance.FinishRpcImmediately(writer);
-                RPCProcedure.forceEnd();
+            // Check if debug mode is active.
+            if (!EnableDebugMode()) return;
+
+            if (Input.GetKey(KeyCode.LeftControl)) {
+                // Spawn dummys
+                if (Input.GetKeyDown(KeyCode.F)) {
+                    var playerControl = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
+                    var i = playerControl.PlayerId = (byte)GameData.Instance.GetAvailableId();
+
+                    bots.Add(playerControl);
+                    GameData.Instance.AddPlayer(playerControl);
+                    AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
+
+                    playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
+#if true
+                    playerControl.GetComponent<DummyBehaviour>().enabled = true;
+                    playerControl.NetTransform.enabled = false;
+#else
+                    playerControl.GetComponent<DummyBehaviour>().enabled = false;
+                    playerControl.isDummy = false;
+                    playerControl.notRealPlayer = true;
+                    playerControl.NetTransform.enabled = true;
+#endif
+                    playerControl.SetName(RandomString(10));
+                    playerControl.SetColor((byte)random.Next(Palette.PlayerColors.Length));
+                    GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
+                }
+
+                // Terminate round
+                if(Input.GetKeyDown(KeyCode.L)) {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ForceEnd, Hazel.SendOption.Reliable, -1);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.forceEnd();
+                }
             }
 
 #if false
@@ -225,7 +251,7 @@ namespace TheOtherRoles
                             debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
                         }
 
-                        var builder = new System.Text.StringBuilder();
+                        StringBuilder builder = new();
                         {
                         }
 

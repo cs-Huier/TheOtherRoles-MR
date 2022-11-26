@@ -176,8 +176,10 @@ namespace TheOtherRoles.Patches {
             if (!SubmergedCompatibility.IsSubmerged) return;
             if (obj.name.Contains("ExileCutscene")) {
                 WrapUpPostfix(ExileControllerBeginPatch.lastExiled);
-            } else if (obj.name.Contains("SpawnInMinigame"))
+            } else if (obj.name.Contains("SpawnInMinigame")) {
                 AntiTeleport.setPosition();
+                Chameleon.lastMoved.Clear();
+            }
         }
 
         static void WrapUpPostfix(GameData.PlayerInfo exiled) {
@@ -188,7 +190,10 @@ namespace TheOtherRoles.Patches {
             // Jester win condition
             else if (exiled != null && Jester.jester != null && Jester.jester.PlayerId == exiled.PlayerId) {
                 Jester.triggerJesterWin = true;
-            } 
+            }
+            // Prosecutor win condition
+            else if (exiled != null && Lawyer.lawyer != null && Lawyer.target != null && Lawyer.isProsecutor && Lawyer.target.PlayerId == exiled.PlayerId && !Lawyer.lawyer.Data.IsDead)
+                Lawyer.triggerProsecutorWin = true;
 
             // Reset custom button timers where necessary
             CustomButton.MeetingEndedUpdate();
@@ -197,6 +202,13 @@ namespace TheOtherRoles.Patches {
             // Reset Yasuna settings.
             if (Yasuna.yasuna != null)
                 Yasuna.specialVoteTargetPlayerId = byte.MaxValue;
+
+            // Reset Yasuna Jr. settings.
+            if (YasunaJr.yasunaJr != null && YasunaJr.specialVoteTargetPlayerId != byte.MaxValue)
+			{
+                YasunaJr.remainingSpecialVotes(true);
+                YasunaJr.specialVoteTargetPlayerId = byte.MaxValue;
+            }
 
             // Mini set adapted cooldown
             if (Mini.mini != null && CachedPlayer.LocalPlayer.PlayerControl == Mini.mini && Mini.mini.Data.Role.IsImpostor) {
@@ -286,6 +298,13 @@ namespace TheOtherRoles.Patches {
 
             // Invert add meeting
             if (Invert.meetings > 0) Invert.meetings--;
+
+            Chameleon.lastMoved.Clear();
+
+            foreach (Trap trap in Trap.traps) trap.triggerable = false;
+            FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(PlayerControl.GameOptions.KillCooldown / 2 + 2, new Action<float>((p) => {
+            if (p == 1f) foreach (Trap trap in Trap.traps) trap.triggerable = true;
+            })));
         }
     }
 
@@ -293,6 +312,7 @@ namespace TheOtherRoles.Patches {
     class AirshipSpawnInPatch {
         static void Postfix() {
             AntiTeleport.setPosition();
+            Chameleon.lastMoved.Clear();
         }
     }
 
@@ -312,7 +332,7 @@ namespace TheOtherRoles.Patches {
                         if (Jester.jester != null && player.PlayerId == Jester.jester.PlayerId) __result = "";
                     }
 
-                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue) {
+                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue && CustomOptionHolder.yasunaSpecificMessageMode.getBool()) {
                         int index = __result.IndexOf("Ç™í«ï˙Ç≥ÇÍÇΩ");
                         if (index != -1) {
                             __result = player.Data.PlayerName + "Ç≥ÇÒÅIÇ‚ÇËÇ‹ÇµÇΩÇÀÇ•Å`ÅI";
