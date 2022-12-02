@@ -7,7 +7,7 @@ namespace TheOtherRoles {
     public class CustomOptionHolder {
         public static string[] rates = new string[]{"0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"};
         public static string[] ratesModifier = new string[]{"1", "2", "3"};
-        public static string[] presets = new string[]{"Preset 1", "Preset 2", "Preset 3", "Preset 4", "Preset 5"};
+        public static string[] presets = new string[]{"预设1", "预设2", "预设3", "预设4", "预设5"};
 
         public static readonly Color AdminColor = new Color32(30, 144, 255, 255);
         public static readonly Color VitalColor = Color.green;
@@ -476,68 +476,68 @@ namespace TheOtherRoles {
             
             
             // Role Options
-            presetSelection = CustomOption.Create(0, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Preset"), presets, null, true);
-            activateRoles = CustomOption.Create(1, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Enable Mod Roles And Block Vanilla Roles"), true, null, true);
+            presetSelection = CustomOption.Create(0, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "预设"), presets, null, true);
+            activateRoles = CustomOption.Create(1, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "启用模组职业并禁用原版职业"), true, null, true);
 
             // Using new id's for the options to not break compatibilty with older versions
-            crewmateRolesCountMin = CustomOption.Create(300, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Crewmate Roles"), 15f, 0f, 15f, 1f, null, true);
-            crewmateRolesCountMax = CustomOption.Create(301, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Crewmate Roles"), 15f, 0f, 15f, 1f);
-            neutralRolesCountMin = CustomOption.Create(302, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Neutral Roles"), 15f, 0f, 15f, 1f);
-            neutralRolesCountMax = CustomOption.Create(303, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Neutral Roles"), 15f, 0f, 15f, 1f);
-            impostorRolesCountMin = CustomOption.Create(304, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Impostor Roles"), 15f, 0f, 15f, 1f);
-            impostorRolesCountMax = CustomOption.Create(305, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Impostor Roles"), 15f, 0f, 15f, 1f);
-            modifiersCountMin = CustomOption.Create(306, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Modifiers"), 15f, 0f, 15f, 1f);
-            modifiersCountMax = CustomOption.Create(307, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Modifiers"), 15f, 0f, 15f, 1f);
+            crewmateRolesCountMin = CustomOption.Create(300, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最小船员职业数"), 15f, 0f, 15f, 1f, null, true);
+            crewmateRolesCountMax = CustomOption.Create(301, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最大船员职业数"), 15f, 0f, 15f, 1f);
+            neutralRolesCountMin = CustomOption.Create(302, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最小中立职业数"), 15f, 0f, 15f, 1f);
+            neutralRolesCountMax = CustomOption.Create(303, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最大中立职业数"), 15f, 0f, 15f, 1f);
+            impostorRolesCountMin = CustomOption.Create(304, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最小内鬼职业数"), 15f, 0f, 15f, 1f);
+            impostorRolesCountMax = CustomOption.Create(305, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最大内鬼职业数"), 15f, 0f, 15f, 1f);
+            modifiersCountMin = CustomOption.Create(306, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最小附加职业数"), 15f, 0f, 15f, 1f);
+            modifiersCountMax = CustomOption.Create(307, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "最大附加职业数"), 15f, 0f, 15f, 1f);
 
             // custom options
-            enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false, null, true);
-            taskVsMode_EnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
-            taskVsMode_Vision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
-            taskVsMode_EnabledBurgerMakeMode = CustomOption.Create(900010004, Types.General, cs(TaskRacer.color, "Enabled Burger Make Mode"), false, enabledTaskVsMode);
-            taskVsMode_BurgerMakeMode_BurgerLayers = CustomOption.Create(900010005, Types.General, cs(TaskRacer.color, "Burger Layers"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, taskVsMode_EnabledBurgerMakeMode);
-            taskVsMode_BurgerMakeMode_MakeBurgerNums = CustomOption.Create(900010006, Types.General, cs(TaskRacer.color, "Make Burger Nums"), 5f, 1f, 100f, 1f, taskVsMode_EnabledBurgerMakeMode);
+            enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "启用任务竞赛模式"), false, null, true);
+            taskVsMode_EnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "制作与房主相同任务"), true, enabledTaskVsMode);
+            taskVsMode_Vision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "任务竞赛视野"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
+            taskVsMode_EnabledBurgerMakeMode = CustomOption.Create(900010004, Types.General, cs(TaskRacer.color, "启用汉堡制作模式"), false, enabledTaskVsMode);
+            taskVsMode_BurgerMakeMode_BurgerLayers = CustomOption.Create(900010005, Types.General, cs(TaskRacer.color, "汉堡层数"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, taskVsMode_EnabledBurgerMakeMode);
+            taskVsMode_BurgerMakeMode_MakeBurgerNums = CustomOption.Create(900010006, Types.General, cs(TaskRacer.color, "制作汉堡三明治"), 5f, 1f, 100f, 1f, taskVsMode_EnabledBurgerMakeMode);
 
-            burgerMinigameBurgerMinLayers = CustomOption.Create(900000006, Types.General, cs(BurgerMinigameColor, "Make Burger Task: Number of burger min layers(Default = 5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null, true);
-            burgerMinigameBurgerMaxLayers = CustomOption.Create(900000007, Types.General, cs(BurgerMinigameColor, "Make Burger Task: Number of burger max layers(Default = 5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null);
+            burgerMinigameBurgerMinLayers = CustomOption.Create(900000006, Types.General, cs(BurgerMinigameColor, "制作汉堡的任务。汉堡的最小层数(默认=5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null, true);
+            burgerMinigameBurgerMaxLayers = CustomOption.Create(900000007, Types.General, cs(BurgerMinigameColor, "制作汉堡的任务。汉堡的最大层数(默认=5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null);
 
-            enabledAdminTimer = CustomOption.Create(998, Types.General, cs(AdminColor, "Enable Admin Map Available Duration"), true, null, true);
-            adminTimer = CustomOption.Create(999, Types.General, cs(AdminColor, "Admin Map Available Duration"), 10f, 0f, 120f, 1f, enabledAdminTimer);
-            viewAdminTimer = CustomOption.Create(10000, Types.General, cs(AdminColor, "View Admin Timer"), true, enabledAdminTimer);
+            enabledAdminTimer = CustomOption.Create(998, Types.General, cs(AdminColor, "启用管理地图可用时间"), true, null, true);
+            adminTimer = CustomOption.Create(999, Types.General, cs(AdminColor, "管理地图可用时间"), 10f, 0f, 120f, 1f, enabledAdminTimer);
+            viewAdminTimer = CustomOption.Create(10000, Types.General, cs(AdminColor, "查看管理时间"), true, enabledAdminTimer);
 
-            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(VitalColor, "Enable Vitals Available Duration"), false, null, true);
-            vitalsTimer = CustomOption.Create(900000000, Types.General, cs(VitalColor, "Vitals Available Duration"), 10f, 0f, 120f, 1f, enabledVitalsTimer);
-            viewVitalsTimer = CustomOption.Create(900000004, Types.General, cs(VitalColor, "View Vitals Timer"), true, enabledVitalsTimer);
+            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(VitalColor, "启用生命体征可用时间"), false, null, true);
+            vitalsTimer = CustomOption.Create(900000000, Types.General, cs(VitalColor, "生命体征可用时间"), 10f, 0f, 120f, 1f, enabledVitalsTimer);
+            viewVitalsTimer = CustomOption.Create(900000004, Types.General, cs(VitalColor, "查看生命体征计时器"), true, enabledVitalsTimer);
 
-            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(SecurityCameraColor, "Enable Security Camera Available Duration"), false, null, true);
-            securityCameraTimer = CustomOption.Create(900000002, Types.General, cs(SecurityCameraColor, "Security Camera Available Duration"), 10f, 0f, 120f, 1f, enabledSecurityCameraTimer);
-            viewSecurityCameraTimer = CustomOption.Create(900000005, Types.General, cs(SecurityCameraColor, "View Security Camera Timer"), true, enabledSecurityCameraTimer);
+            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(SecurityCameraColor, "启用安全摄像机的可用时间"), false, null, true);
+            securityCameraTimer = CustomOption.Create(900000002, Types.General, cs(SecurityCameraColor, "可用的安全摄像机时间"), 10f, 0f, 120f, 1f, enabledSecurityCameraTimer);
+            viewSecurityCameraTimer = CustomOption.Create(900000005, Types.General, cs(SecurityCameraColor, "查看安全摄像机定时器"), true, enabledSecurityCameraTimer);
 
-            hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false, null, true);
-            delayBeforeMeeting = CustomOption.Create(9921, Types.General, "Delay Time Before Meeting.", 2f, 0f, 10f, 0.25f);
-            hideOutOfSightNametags = CustomOption.Create(550, Types.General, "Hide the names of out of sight players", false);
-            alwaysConsumeKillCooldown = CustomOption.Create(9911, Types.General, "Always Consume Kill Cooldown", false);
-            stopConsumeKillCooldownInVent = CustomOption.Create(9912, Types.General, "Stop Consume Kill Cooldown In Vent", false, alwaysConsumeKillCooldown);
-            stopConsumeKillCooldownOnSwitchingTask = CustomOption.Create(9931, Types.General, "Stop Consume Kill Cooldown On \"Switching Task\"", false, alwaysConsumeKillCooldown);
-            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
-            impostorCanKillCustomRolesInTheVent = CustomOption.Create(920000003, Types.General, "Impostor Can Kill CustomRoles In The Vent", false);
+            hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "在破坏性地图上隐藏假的任务", false, null, true);
+            delayBeforeMeeting = CustomOption.Create(9921, Types.General, "会议前的延迟时间", 2f, 0f, 10f, 0.25f);
+            hideOutOfSightNametags = CustomOption.Create(550, Types.General, "隐藏视线范围外的玩家", false);
+            alwaysConsumeKillCooldown = CustomOption.Create(9911, Types.General, "始终进行击杀冷却", false);
+            stopConsumeKillCooldownInVent = CustomOption.Create(9912, Types.General, "管道停止进行击杀冷却", false, alwaysConsumeKillCooldown);
+            stopConsumeKillCooldownOnSwitchingTask = CustomOption.Create(9931, Types.General, "切换任务停止击杀冷却", false, alwaysConsumeKillCooldown);
+            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "随机连线任务", false);
+            impostorCanKillCustomRolesInTheVent = CustomOption.Create(920000003, Types.General, "可在管道击杀", false);
 
-            airshipHeliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, cs(AirShipColor, "Time Limit of Avert Crash Time (AirShip)"), 90f, 5f, 120f, 5f, null, true);
-            airshipWallCheckOnTasks = CustomOption.Create(920000001, Types.General, cs(AirShipColor, "Enable Wall Check On Tasks (Airship)"), false);
-            airshipRandomSpawn = CustomOption.Create(9916, Types.General, cs(AirShipColor, "Random Spawn (AirShip)"), false);
-            airshipAdditionalSpawn = CustomOption.Create(9917, Types.General, cs(AirShipColor, "Additional Spawn (AirShip)"), false);
-            airshipSynchronizedSpawning = CustomOption.Create(9918, Types.General, cs(AirShipColor, "Synchronized Spawn (AirShip)"), false);
-            airshipSetOriginalCooldown = CustomOption.Create(9919, Types.General, cs(AirShipColor, "Set Original Cooldown On First Spawn (AirShip)"), false);
-            airshipInitialDoorCooldown = CustomOption.Create(9923, Types.General, cs(AirShipColor, "Initial Door Sabotage Cooldown (AirShip)"), 0f, 0f, 60f, 1f);
-            airshipInitialSabotageCooldown = CustomOption.Create(9924, Types.General, cs(AirShipColor, "Initial Sabotage Cooldown (AirShip)"), 15f, 0f, 60f, 1f);
-            airshipChangeOldAdmin = CustomOption.Create(9925, Types.General, cs(AirShipColor, "Change Old Admin (AirShip)"), false);
+            airshipHeliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, cs(AirShipColor, "避免碰撞的时间限制(AirShip)"), 90f, 5f, 120f, 5f, null, true);
+            airshipWallCheckOnTasks = CustomOption.Create(920000001, Types.General, cs(AirShipColor, "启用任务墙检查(Airship)"), false);
+            airshipRandomSpawn = CustomOption.Create(9916, Types.General, cs(AirShipColor, "随机出生点(AirShip)"), false);
+            airshipAdditionalSpawn = CustomOption.Create(9917, Types.General, cs(AirShipColor, "额外出生点(AirShip)"), false);
+            airshipSynchronizedSpawning = CustomOption.Create(9918, Types.General, cs(AirShipColor, "同步出生(AirShip)"), false);
+            airshipSetOriginalCooldown = CustomOption.Create(9919, Types.General, cs(AirShipColor, "在第一次出生时设置原始冷却时间(AirShip)"), false);
+            airshipInitialDoorCooldown = CustomOption.Create(9923, Types.General, cs(AirShipColor, "初始门破坏的冷却时间(AirShip)"), 0f, 0f, 60f, 1f);
+            airshipInitialSabotageCooldown = CustomOption.Create(9924, Types.General, cs(AirShipColor, "初始破坏的冷却时间 (AirShip)"), 15f, 0f, 60f, 1f);
+            airshipChangeOldAdmin = CustomOption.Create(9925, Types.General, cs(AirShipColor, "更换旧的管理(AirShip)"), false);
 
 
-            enabledHappyBirthdayMode = CustomOption.Create(900020000, Types.General, cs(Color.green, "Enable Seacret Mode"), false, null, true);
-            happyBirthdayMode_Target = CustomOption.Create(900020001, Types.General, cs(Color.green, "Target"), 0f, 0f, byte.MaxValue, 1f, enabledHappyBirthdayMode);
-            happyBirthdayMode_EnabledTargetImpostor = CustomOption.Create(900020002, Types.General, cs(Color.green, "Enabled Target Impostor"), false, enabledHappyBirthdayMode);
-            happyBirthdayMode_CakeType = CustomOption.Create(900020003, Types.General, cs(Color.green, "Cake Type"), 0f, 0f, (int)Objects.BirthdayCake.CakeType.sizeof_CakeType - 1, 1f, enabledHappyBirthdayMode);
-            happyBirthdayMode_TargetBirthMonth = CustomOption.Create(900020004, Types.General, cs(Color.green, "Target Birth Month"), 0f, 0f, 12f, 1f, enabledHappyBirthdayMode);
-            happyBirthdayMode_TargetBirthDay = CustomOption.Create(900020005, Types.General, cs(Color.green, "Target Birth Day"), 0f, 0f, 31f, 1f, enabledHappyBirthdayMode);
+            enabledHappyBirthdayMode = CustomOption.Create(900020000, Types.General, cs(Color.green, "启用海底捞模式"), false, null, true);
+            happyBirthdayMode_Target = CustomOption.Create(900020001, Types.General, cs(Color.green, "目标"), 0f, 0f, byte.MaxValue, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_EnabledTargetImpostor = CustomOption.Create(900020002, Types.General, cs(Color.green, "已启用的目标内鬼"), false, enabledHappyBirthdayMode);
+            happyBirthdayMode_CakeType = CustomOption.Create(900020003, Types.General, cs(Color.green, "蛋糕类型"), 0f, 0f, (int)Objects.BirthdayCake.CakeType.sizeof_CakeType - 1, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_TargetBirthMonth = CustomOption.Create(900020004, Types.General, cs(Color.green, "目标出生月份"), 0f, 0f, 12f, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_TargetBirthDay = CustomOption.Create(900020005, Types.General, cs(Color.green, "目标出生日"), 0f, 0f, 31f, 1f, enabledHappyBirthdayMode);
 
 
             // MR ========================================================

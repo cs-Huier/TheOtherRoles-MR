@@ -2,14 +2,14 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <Version>2.6.0</Version>
-        <Description>TheOtherRoles MR</Description>
+        <Description>TheOtherRoles MR CN</Description>
         <Authors>miru-y</Authors>
 		<LangVersion>latest</LangVersion>
         <DefineConstants>$(DefineConstants);STEAM</DefineConstants>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <PlatformTarget>x86</PlatformTarget>
-        <AssemblyName>TheOtherRolesMR</AssemblyName>
+        <AssemblyName>TheOtherRolesMRCN</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

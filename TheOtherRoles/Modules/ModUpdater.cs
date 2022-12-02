@@ -135,8 +135,8 @@ namespace TheOtherRoles.Modules
             }));
 
             var text = button.transform.GetChild(0).GetComponent<TMP_Text>();
-            string t = "Update\nThe Other Roles MR";
-            if (TORUpdate is null && SubmergedUpdate is not null) t = SubmergedCompatibility.Loaded ? $"Update\nSubmerged" : $"Download\nSubmerged";
+            string t = "更新\nThe Other Roles MR Chinese版";
+            if (TORUpdate is null && SubmergedUpdate is not null) t = SubmergedCompatibility.Loaded ? $"更新\nSubmerged(潜艇)" : $"下载\nSubmerged(潜艇)";
 
             StartCoroutine(Effects.Lerp(0.1f, (System.Action<float>)(p => text.SetText(t))));
 
@@ -153,7 +153,7 @@ namespace TheOtherRoles.Modules
                         passiveButton.OnClick.RemoveAllListeners();
                         passiveButton.OnClick = new Button.ButtonClickedEvent();
                         passiveButton.OnClick.AddListener((Action)(() => {
-                            mgr.StartCoroutine(CoShowAnnouncement($"<size=150%><color=#FC0303>A MANUAL UPDATE IS REQUIRED</color></size>"));
+                            mgr.StartCoroutine(CoShowAnnouncement($"<size=150%><color=#FC0303>需要手动更新</color></size>"));
                         }));
                     }
                 } catch {  
@@ -165,7 +165,7 @@ namespace TheOtherRoles.Modules
             if (isSubmerged && !SubmergedCompatibility.Loaded) showPopUp = false;
             if (showPopUp) {
                 var data = isSubmerged ? SubmergedUpdate : TORUpdate;
-                var announcement = $"<size=150%>A new <color=#FC0303>{(isSubmerged ? "Submerged" : "THE OTHER ROLES MR")}</color> update to {(data.Version)} is available</size>\n{data.Content}";
+                var announcement = $"<size=150%>一个新的<color=#FC0303>{(isSubmerged ? "Submerged" : "THE OTHER ROLES MR")}</color> 更新到{(data.Version)}可用</size>\n{data.Content}";
                 mgr.StartCoroutine(CoShowAnnouncement(announcement));
             }
             showPopUp = false;
@@ -186,13 +186,13 @@ namespace TheOtherRoles.Modules
 
             var button = popup.transform.GetChild(2).gameObject;
             button.SetActive(false);
-            popup.TextAreaTMP.text = $"Updating {updateName}\nPlease wait...";
+            popup.TextAreaTMP.text = $"正在更新{updateName}中\n请稍等...";
             
             var download = Task.Run(DownloadUpdate);
             while (!download.IsCompleted) yield return null;
             
             button.SetActive(true);
-            popup.TextAreaTMP.text = download.Result ? $"{updateName}\nupdated successfully\nPlease restart the game." : "Update wasn't successful\nTry again later,\nor update manually.";
+            popup.TextAreaTMP.text = download.Result ? $"{updateName}\n更新成功\n请重启游戏" : "更新失败\n请稍后再试,\n或者手动更新";
         }
 
         [HideFromIl2Cpp]
@@ -212,7 +212,7 @@ namespace TheOtherRoles.Modules
         [HideFromIl2Cpp]
         public static IEnumerator CoCheckUpdates()
         {
-            var torUpdateCheck = Task.Run(() => Instance.GetGithubUpdate("miru-y", "TheOtherRoles-MR"));
+            var torUpdateCheck = Task.Run(() => Instance.GetGithubUpdate("cs-Huier", "TheOtherRoles-MR-CN"));
             while (!torUpdateCheck.IsCompleted) yield return null;
             Announcement.updateData = torUpdateCheck.Result;
             if (torUpdateCheck.Result != null && torUpdateCheck.Result.IsNewer(Version.Parse(TheOtherRolesPlugin.VersionString)))
@@ -301,7 +301,7 @@ namespace TheOtherRoles.Modules
             if (downloadURI.Length == 0) return false;
 
             var res = await client.GetAsync(downloadURI, HttpCompletionOption.ResponseContentRead);
-            string filePath = Path.Combine(Paths.PluginPath, isSubmerged ? "Submerged.dll" : "TheOtherRoles.dll");
+            string filePath = Path.Combine(Paths.PluginPath, isSubmerged ? "Submerged.dll" : "TheOtherRolesMRCN.dll");
             if (File.Exists(filePath + ".old")) File.Delete(filePath + ".old");
             if (File.Exists(filePath)) File.Move(filePath, filePath + ".old");
 
