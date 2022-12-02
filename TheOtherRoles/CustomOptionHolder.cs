@@ -542,15 +542,15 @@ namespace TheOtherRoles {
 
             // MR ========================================================
             // YASUNA (Crewmate)
-            yasunaSpawnRate = CustomOption.Create(910000000, Types.Crewmate, cs(Yasuna.color, "Yasuna"), rates, null, true);
-            yasunaIsImpYasunaRate = CustomOption.Create(910000002, Types.Crewmate, "Chance That The Yasuna Is An Impostor", rates, yasunaSpawnRate);
-            yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, Types.Crewmate, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
+            yasunaSpawnRate = CustomOption.Create(910000000, Types.Crewmate, cs(Yasuna.color, "亚苏娜"), rates, null, true);
+            yasunaIsImpYasunaRate = CustomOption.Create(910000002, Types.Crewmate, "亚苏娜为内鬼概率", rates, yasunaSpawnRate);
+            yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, Types.Crewmate, "亚苏娜的票数", 1f, 1f, 15, 1f, yasunaSpawnRate);
             // Change the message when the target is exiled by Yasuna's system to Yasuna-specific message (Japanese-only)
-            yasunaSpecificMessageMode = CustomOption.Create(910000003, Types.Crewmate, "Yasuna-specific Message Mode", false, yasunaSpawnRate);
+            yasunaSpecificMessageMode = CustomOption.Create(910000003, Types.Crewmate, "亚苏娜特有信息模式", false, yasunaSpawnRate);
 
             // YASUNA JR.(Crewmate)
-            yasunaJrSpawnRate = CustomOption.Create(910000500, Types.Crewmate, cs(YasunaJr.color, "Yasuna Jr"), rates, null, true);
-            yasunaJrNumberOfSpecialVotes = CustomOption.Create(910000501, Types.Crewmate, "Yasuna Jr. Number Of Special Votes", 1f, 1f, 15, 1f, yasunaJrSpawnRate);
+            yasunaJrSpawnRate = CustomOption.Create(910000500, Types.Crewmate, cs(YasunaJr.color, "小亚苏娜"), rates, null, true);
+            yasunaJrNumberOfSpecialVotes = CustomOption.Create(910000501, Types.Crewmate, "小亚苏娜的票数", 1f, 1f, 15, 1f, yasunaJrSpawnRate);
 
             // TASK MASTER (Crewmate)
             taskMasterSpawnRate = CustomOption.Create(910000100, Types.Crewmate, cs(TaskMaster.color, "TaskMaster"), rates, null, true);
